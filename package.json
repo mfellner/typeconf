@@ -3,9 +3,16 @@
   "version": "0.1.0",
   "description": "A typesafe hierarchical configuration manager for Node.js.",
   "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
   "repository": "https://github.com/mfellner/typeconf",
   "author": "Maximilian Fellner <max.fellner@gmail.com>",
   "license": "MIT",
+  "keywords": [
+    "configuration",
+    "settings",
+    "typescript",
+    "environment"
+  ],
   "engines": {
     "node": ">=6.11.0"
   },
