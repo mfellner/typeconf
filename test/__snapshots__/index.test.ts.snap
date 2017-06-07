@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TypeConf throw a TypeError for an illegal number 1`] = `"Not a number: NaN"`;
+
+exports[`TypeConf throw a TypeError for an illegal object 1`] = `"Not an object: value"`;

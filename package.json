@@ -1,0 +1,57 @@
+{
+  "name": "typeconf",
+  "version": "0.1.0",
+  "description": "A typesafe hierarchical configuration manager for Node.js.",
+  "main": "dist/index.js",
+  "repository": "https://github.com/mfellner/typeconf",
+  "author": "Maximilian Fellner <max.fellner@gmail.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.11.0"
+  },
+  "scripts": {
+    "clean": "rimraf dist/*",
+    "build": "tsc -p .",
+    "dist": "npm run clean && npm run build",
+    "lint": "tslint --type-check --project tsconfig.json",
+    "test": "npm run lint && jest --coverage",
+    "prettier": "prettier --print-width=100 --single-quote --write \"./src/**/*.+(js|ts)\"",
+    "prepublishOnly": "npm run dist"
+  },
+  "dependencies": {
+    "change-case": "3.0.1"
+  },
+  "optionalDependencies": {
+    "js-yaml": "3.8.4",
+    "minimist": "1.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "19.2.4",
+    "@types/minimist": "1.2.0",
+    "@types/node": "7.0.28",
+    "jest": "20.0.4",
+    "prettier": "1.4.2",
+    "rimraf": "2.6.1",
+    "ts-jest": "20.0.5",
+    "tslint": "5.4.3",
+    "typescript": "2.3.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "js",
+      "ts"
+    ],
+    "transform": {
+      "\\.ts$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "/test/.*\\.test.ts$",
+    "mapCoverage": true,
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text",
+      "html"
+    ]
+  }
+}
