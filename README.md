@@ -1,8 +1,6 @@
-# TypeConf
+![typeconf](https://user-images.githubusercontent.com/1183636/26884982-7e63efd0-4ba1-11e7-845d-4ade4627039c.png) &nbsp; [![Travis](https://img.shields.io/travis/mfellner/typeconf.svg)](travis-ci.org/mfellner/typeconf) [![Codecov](https://img.shields.io/codecov/c/github/mfellner/typeconf.svg)](https://codecov.io/gh/mfellner/janus) [![codebeat badge](https://codebeat.co/badges/6df3709c-deed-4a8f-af7d-2e1ccda63591)](https://codebeat.co/projects/github-com-mfellner-typeconf-master) [![npm](https://img.shields.io/npm/v/typeconf.svg)](https://www.npmjs.com/package/typeconf) [![license](https://img.shields.io/github/license/mfellner/typeconf.svg)](https://choosealicense.com/licenses/mit)
 
-[![Travis](https://img.shields.io/travis/mfellner/typeconf.svg)](travis-ci.org/mfellner/typeconf) [![Codecov](https://img.shields.io/codecov/c/github/mfellner/typeconf.svg)](https://codecov.io/gh/mfellner/janus) [![npm](https://img.shields.io/npm/v/typeconf.svg)](https://www.npmjs.com/package/typeconf) [![license](https://img.shields.io/github/license/mfellner/typeconf.svg)](https://choosealicense.com/licenses/mit)
-
-A typesafe hierarchical configuration manager for Node.js.
+**TypeConf** is a typesafe hierarchical configuration manager for Node.js.
 
 ## Usage
 
