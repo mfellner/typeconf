@@ -2,13 +2,15 @@ import fs = require('fs');
 import path = require('path');
 import changeCase = require('change-case');
 
-function readFile(file: string, parser: (s: string) => object): object {
+function readFile(file: string, parser: (s: string) => any): object {
   try {
-    return parser(fs.readFileSync(file, 'utf8'));
+    const result = parser(fs.readFileSync(file, 'utf8'));
+    if (typeof result === 'object' && result !== null) return result;
+    console.error(`Invalid configuration file: ${file}`);
   } catch (e) {
     console.error(`Unable to read ${file}`);
-    return {};
   }
+  return {};
 }
 
 function readConfigFile(filePath: string): object {
