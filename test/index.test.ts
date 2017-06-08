@@ -23,6 +23,14 @@ describe('TypeConf', () => {
     expect(conf.get('ymlSupported')).toBe(true);
   });
 
+  test('reject an empty YAML file gracefully', () => {
+    const mockError = jest.fn();
+    global.console.error = mockError;
+    const empty = path.resolve(__dirname, 'empty.yaml');
+    expect(conf.withFile(empty) instanceof TypeConf).toBe(true);
+    expect(mockError).toBeCalled();
+  });
+
   test('reject empty file paths gracefully', () => {
     expect(conf.withFile('') instanceof TypeConf).toBe(true);
   });
