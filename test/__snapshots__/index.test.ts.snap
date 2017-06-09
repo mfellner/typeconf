@@ -3,3 +3,5 @@
 exports[`TypeConf throw a TypeError for an illegal number 1`] = `"Not a number: NaN"`;
 
 exports[`TypeConf throw a TypeError for an illegal object 1`] = `"Not an object: value"`;
+
+exports[`TypeConf throw a TypeError if a custom type cannot be instantiated 1`] = `"Cannot instantiate MyType from 42."`;

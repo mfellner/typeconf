@@ -129,6 +129,38 @@ describe('TypeConf', () => {
     expect(conf.getBoolean('example')).toBe(true);
   });
 
+  class MyType {
+    public x: string;
+    public y: number;
+    constructor(args: { x: string; y: number }) {
+      if (!args || !args.x || !args.y) {
+        throw new Error('Illegal arguments.');
+      }
+      this.x = args.x;
+      this.y = args.y;
+    }
+  }
+
+  test('get an instantiable type', () => {
+    conf.set('example', { x: 'x', y: 42 });
+    const value = conf.getType('example', MyType);
+    expect(value).toBeInstanceOf(MyType);
+    expect(value.x).toBe('x');
+    expect(value.y).toBe(42);
+  });
+
+  test('use a fallback instantiable type value', () => {
+    const value = conf.getType('example', MyType, new MyType({ x: 'z', y: 41 }));
+    expect(value).toBeInstanceOf(MyType);
+    expect(value.x).toBe('z');
+    expect(value.y).toBe(41);
+  });
+
+  test('throw a TypeError if a custom type cannot be instantiated', () => {
+    conf.set('example', 42);
+    expect(() => conf.getType('example', MyType)).toThrowErrorMatchingSnapshot();
+  });
+
   test('throw a TypeError for an illegal number', () => {
     conf.withFile(path.resolve(__dirname, 'conf.json'));
     expect(() => conf.getNumber('example')).toThrowErrorMatchingSnapshot();
