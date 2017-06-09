@@ -37,15 +37,22 @@ function randomString(): string {
  */
 export type Store = { [key: string]: any };
 
-function firstDefined<A, B>(a: A | undefined, b?: B): A | B | void {
+function firstDefined<A, B>(a: A | undefined, b?: B): A | B | undefined {
   if (a !== undefined) return a;
   else return b;
 }
 
 export class TypeError extends Error {
-  constructor(message: string) {
+  public readonly cause?: Error;
+
+  constructor(message: string, cause?: Error) {
     super(message);
+    this.cause = cause;
   }
+}
+
+export interface Newable<T> {
+  new (...args: any[]): T;
 }
 
 /**
@@ -227,7 +234,7 @@ export default class TypeConf {
   /**
    * Return a stored value.
    * @param name Name of the value.
-   * @param fallback optional fallback value.
+   * @param fallback Optional fallback value.
    * @return The stored value.
    */
   public get(name: string, fallback?: any): any {
@@ -237,12 +244,12 @@ export default class TypeConf {
   /**
    * Return a stored value as a string.
    * @param name Name of the value.
-   * @param fallback optional fallback value.
+   * @param fallback Optional fallback value.
    * @return The stored value as a string.
    */
-  public getString(name: string, fallback: string): string;
-  public getString(name: string, fallback?: string): string | void;
-  public getString(name: string, fallback?: string): string | void {
+  // public getString(name: string, fallback: string): string;
+  // public getString(name: string, fallback?: string): string | undefined;
+  public getString(name: string, fallback?: string): string | undefined {
     const value = this.resolve(name);
     if (typeof value === 'string') {
       return value;
@@ -254,12 +261,12 @@ export default class TypeConf {
   /**
    * Return a stored value as a number.
    * @param name Name of the value.
-   * @param fallback optional fallback value.
+   * @param fallback Optional fallback value.
    * @return The stored value as a number.
    */
   public getNumber(name: string, fallback: number): number;
-  public getNumber(name: string, fallback?: number): number | void;
-  public getNumber(name: string, fallback?: number): number | void {
+  public getNumber(name: string, fallback?: number): number | undefined;
+  public getNumber(name: string, fallback?: number): number | undefined {
     const value = parseFloat(this.resolve(name));
     if (isNaN(value)) {
       if (fallback !== undefined) return fallback;
@@ -281,12 +288,12 @@ export default class TypeConf {
   /**
    * Return a stored value as an object.
    * @param name Name of the value.
-   * @param fallback optional fallback value.
+   * @param fallback Optional fallback value.
    * @return The stored value as an object.
    */
   public getObject(name: string, fallback: object): object;
-  public getObject(name: string, fallback?: object): object | void;
-  public getObject(name: string, fallback?: object): object | void {
+  public getObject(name: string, fallback?: object): object | undefined;
+  public getObject(name: string, fallback?: object): object | undefined {
     const value = this.resolve(name);
     if (typeof value === 'string') {
       try {
@@ -296,6 +303,26 @@ export default class TypeConf {
       }
     } else {
       return firstDefined(value, fallback);
+    }
+  }
+
+  /**
+   * Return a stored value as an instantiable type.
+   * @param name Name of the value.
+   * @param Newable Constructor of the type to instantiate.
+   * @param fallback Optional fallback value.
+   */
+  public getType<T>(name: string, Newable: Newable<T>, fallback: T): T;
+  public getType<T>(name: string, Newable: Newable<T>, fallback?: T): T | undefined;
+  public getType<T>(name: string, Newable: Newable<T>, fallback?: T): T | undefined {
+    const value = this.resolve(name);
+    if (value === undefined && fallback !== undefined) {
+      return fallback;
+    }
+    try {
+      return new Newable(value);
+    } catch (e) {
+      throw new TypeError(`Cannot instantiate ${Newable.name} from ${value}.`, e);
     }
   }
 }
