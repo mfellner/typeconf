@@ -37,11 +37,6 @@ function randomString(): string {
  */
 export type Store = { [key: string]: any };
 
-function firstDefined<A, B>(a: A | undefined, b?: B): A | B | undefined {
-  if (a !== undefined) return a;
-  else return b;
-}
-
 export class TypeError extends Error {
   public readonly cause?: Error;
 
@@ -234,11 +229,17 @@ export default class TypeConf {
   /**
    * Return a stored value.
    * @param name Name of the value.
-   * @param fallback Optional fallback value.
+   * @param transform Optional transformation function.
    * @return The stored value.
    */
-  public get(name: string, fallback?: any): any {
-    return firstDefined(this.resolve(name), fallback);
+  public get<T>(name: string, transform: (x: any) => T): T;
+  public get<T>(name: string, transform?: undefined): any;
+  public get<T>(name: string, transform?: ((x: any) => T)): T | any {
+    if (typeof transform === 'function') {
+      return transform(this.resolve(name));
+    } else {
+      return this.resolve(name);
+    }
   }
 
   /**
@@ -247,15 +248,23 @@ export default class TypeConf {
    * @param fallback Optional fallback value.
    * @return The stored value as a string.
    */
-  // public getString(name: string, fallback: string): string;
-  // public getString(name: string, fallback?: string): string | undefined;
+  public getString(name: string, fallback: string): string;
+  public getString(name: string, fallback?: string): string | undefined;
   public getString(name: string, fallback?: string): string | undefined {
     const value = this.resolve(name);
     if (typeof value === 'string') {
       return value;
-    } else {
-      return firstDefined(JSON.stringify(value), fallback);
     }
+    if (value !== undefined) {
+      return JSON.stringify(value);
+    }
+    if (typeof fallback === 'string') {
+      return fallback;
+    }
+    if (fallback === undefined) {
+      return;
+    }
+    throw new TypeError(`Not a string: ${fallback}`);
   }
 
   /**
@@ -267,12 +276,27 @@ export default class TypeConf {
   public getNumber(name: string, fallback: number): number;
   public getNumber(name: string, fallback?: number): number | undefined;
   public getNumber(name: string, fallback?: number): number | undefined {
-    const value = parseFloat(this.resolve(name));
-    if (isNaN(value)) {
-      if (fallback !== undefined) return fallback;
-      else throw new TypeError(`Not a number: ${value}`);
+    const value = this.resolve(name);
+    if (typeof value === 'number' && !isNaN(value)) {
+      return value;
     }
-    return value;
+    if (typeof value === 'string') {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue)) {
+        return parsedValue;
+      }
+      throw new TypeError(`Not a number: ${value}`);
+    }
+    if (value !== undefined && fallback === undefined) {
+      throw new TypeError(`Not a number: ${value}`);
+    }
+    if (typeof fallback === 'number' && !isNaN(fallback)) {
+      return fallback;
+    }
+    if (fallback === undefined) {
+      return;
+    }
+    throw new TypeError(`Not a number: ${fallback}`);
   }
 
   /**
@@ -295,15 +319,23 @@ export default class TypeConf {
   public getObject(name: string, fallback?: object): object | undefined;
   public getObject(name: string, fallback?: object): object | undefined {
     const value = this.resolve(name);
-    if (typeof value === 'string') {
+    if (typeof value === 'object' && value) {
+      return value;
+    }
+    if (typeof value === 'string' && value) {
       try {
-        return firstDefined(JSON.parse(value), fallback);
+        return JSON.parse(value);
       } catch (e) {
         throw new TypeError(`Not an object: ${value}`);
       }
-    } else {
-      return firstDefined(value, fallback);
     }
+    if (fallback === undefined) {
+      return;
+    }
+    if (typeof fallback === 'object') {
+      return fallback;
+    }
+    throw new TypeError(`Not an object: ${fallback}`);
   }
 
   /**
