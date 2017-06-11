@@ -53,8 +53,16 @@ describe('TypeConf', () => {
     expect(conf.getString('example', 'fallback')).toBe('fallback');
   });
 
+  test('return undefined without a fallback string', () => {
+    expect(conf.getString('example')).toBeUndefined();
+  });
+
   test('use a fallback number value', () => {
     expect(conf.getNumber('number', 1)).toBe(1);
+  });
+
+  test('return undefined without a fallback number', () => {
+    expect(conf.getNumber('number')).toBeUndefined();
   });
 
   test('override a string value', () => {
@@ -84,6 +92,16 @@ describe('TypeConf', () => {
     expect(conf.getObject('testObject')).toEqual({
       foo: 'bar'
     });
+  });
+
+  test('get a fallback object', () => {
+    expect(conf.getObject('test', { bar: 'foo' })).toEqual({
+      bar: 'foo'
+    });
+  });
+
+  test('return undefined without a fallback object', () => {
+    expect(conf.getObject('test')).toBeUndefined();
   });
 
   test('get an array', () => {
@@ -141,6 +159,11 @@ describe('TypeConf', () => {
     }
   }
 
+  test('get a converted type', () => {
+    conf.set('example', '42');
+    expect(conf.get('example', n => parseFloat(n))).toBe(42);
+  });
+
   test('get an instantiable type', () => {
     conf.set('example', { x: 'x', y: 42 });
     const value = conf.getType('example', MyType);
@@ -161,14 +184,31 @@ describe('TypeConf', () => {
     expect(() => conf.getType('example', MyType)).toThrowErrorMatchingSnapshot();
   });
 
-  test('throw a TypeError for an illegal number', () => {
+  test('throw a TypeError for an unparsable number', () => {
     conf.withFile(path.resolve(__dirname, 'conf.json'));
     expect(() => conf.getNumber('example')).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throw a TypeError for an non-number', () => {
+    conf.withFile(path.resolve(__dirname, 'conf.json'));
+    expect(() => conf.getNumber('boolean')).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throw a TypeError for an illegal fallback number', () => {
+    expect(() => conf.getNumber('number', null)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throw a TypeError for an illegal fallback string', () => {
+    expect(() => conf.getString('example', null)).toThrowErrorMatchingSnapshot();
   });
 
   test('throw a TypeError for an illegal object', () => {
     conf.withFile(path.resolve(__dirname, 'conf.json'));
     expect(() => conf.getObject('example')).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throw a TypeError for an illegal fallback object', () => {
+    expect(() => conf.getObject('example', 0 as any)).toThrowErrorMatchingSnapshot();
   });
 
   test('get values from a store', () => {
