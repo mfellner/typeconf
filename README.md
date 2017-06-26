@@ -10,8 +10,8 @@ With TypeConf it's easy to retrieve typed configuration values from different so
 import TypeConf = require('typeconf');
 
 const conf = new TypeConf()
-  .withEnv()
   .withFile('./conf.json');
+  .withEnv();
 
 const port = conf.getNumber('port');
 const secret = conf.getString('secret');
@@ -27,6 +27,59 @@ TypeConf supports different storage backends for configuration values:
 * **withStore(store: object, name?: string)** JavaScript object
 * **withSupplier(supplier: (key: string) => any, name?: string)** Supplier function
 * **set(key: string, value: any)** Override a value
+
+Backends are queried for existing values in the reverse order that they were added. For example:
+
+```js
+const conf = new TypeConf()
+  .withFile('./conf.json');
+  .withEnv()
+  .withArgv();
+
+const example = conf.get('example');
+```
+
+In this case TypeConf will check for existing values in the following order:
+
+1. A command line argument `--example`
+2. An evironment variable `EXAMPLE`
+3. An configuration file entry `"example": ...`
+
+## Nested object properties
+
+TypeConf can extract nested object properties from environment varibles:
+
+```js
+const conf = new TypeConf()
+  .withStore({
+    example: {
+      test: 'test'
+    }
+  })
+  .withEnv();
+```
+
+This example configuration uses a static object store and environment variables. In order to add or override properties on the `example` object we can do the following:
+
+```sh
+export EXAMPLE__TEST="override"
+export EXAMPLE__OTHER="another property"
+```
+
+By default, TypeConf uses two "underline" characters (`__`) as a separator. We can even define completely new objects using this method:
+
+```sh
+export ANOTHER__A="property A"
+export ANOTHER__B__C="property b.c"
+```
+
+```js
+const another = conf.getObject('another');
+another === {
+  a: 'property A',
+  b: { c: 'property b.c' }
+}
+```
 
 ## API documentation
 

@@ -1,5 +1,6 @@
 import fs = require('fs');
 import path = require('path');
+import merge = require('lodash.merge');
 import changeCase = require('change-case');
 
 function readFile(file: string, parser: (s: string) => any): object {
@@ -32,11 +33,6 @@ function randomString(): string {
   return Math.random().toString(36).substring(2, 10);
 }
 
-/**
- * A storage of configuration values.
- */
-export type Store = { [key: string]: any };
-
 export class TypeError extends Error {
   public readonly cause?: Error;
 
@@ -50,52 +46,82 @@ export interface Newable<T> {
   new (...args: any[]): T;
 }
 
+interface Accessor {
+  (name: string, peek: true): boolean;
+  (name: string, peek: false): any;
+  (name: string, peek?: boolean): any;
+}
+
+interface Store {
+  get(name: string, next: Accessor): any;
+  has(name: string, next: Accessor): boolean;
+}
+
+type Storage = ({ [name: string]: any } | ((name: string) => any));
+
+function getValueOrNext(name: string, storage: Storage, next: Accessor): any {
+  const value = typeof storage === 'function' ? storage(name) : storage[name];
+  return value !== undefined ? value : next(name);
+}
+
+function peekValueOrNext(name: string, storage: Storage, next: Accessor): boolean {
+  const exists = typeof storage === 'function' ? storage(name) !== undefined : name in storage;
+  return exists || next(name, true);
+}
+
+function createStore(storage: Storage, nameModifier: (name: string) => string = _ => _) {
+  return {
+    get: (name: string, next: Accessor) => getValueOrNext(nameModifier(name), storage, next),
+    has: (name: string, next: Accessor) => peekValueOrNext(nameModifier(name), storage, next)
+  };
+}
+
+function createAccessor(store: Store, next: Accessor): Accessor {
+  return (name: string, peek?: boolean) => {
+    if (peek === true) {
+      return store.has(name, next);
+    } else {
+      return store.get(name, next);
+    }
+  };
+}
+
+const baseAccessor = (_: string, peek?: boolean) => {
+  if (peek === true) return false;
+  else return undefined as any;
+};
+
 /**
  * A hierarchical configuration manager that supports multiple sources.
  */
 export default class TypeConf {
-  private readonly override: Store;
+  private readonly override: { [key: string]: any };
   private readonly stores: { [name: string]: Store };
-  private readonly storeNames: string[];
+  private rootAccessor: Accessor;
 
   constructor() {
     this.override = {};
     this.stores = {};
-    this.storeNames = [];
+    this.rootAccessor = baseAccessor;
   }
 
   private resolve(name: string): any {
     if (name in this.override) {
       return this.override[name];
     }
-
-    for (const key of this.storeNames) {
-      if (name in this.stores[key]) {
-        return this.stores[key][name];
-      }
-    }
+    return this.rootAccessor(name, false);
   }
 
   private exists(name: string): boolean {
     if (name in this.override) {
       return true;
     }
-
-    for (const key in this.stores) {
-      if (name in this.stores[key]) {
-        return true;
-      }
-    }
-    return false;
+    return this.rootAccessor(name, true);
   }
 
   private addStore(store: Store, name: string): void {
     this.stores[name] = store;
-    const i = this.storeNames.indexOf(name);
-    if (i !== -1) {
-      this.storeNames.splice(i, 1);
-    }
-    this.storeNames.push(name);
+    this.rootAccessor = createAccessor(store, this.rootAccessor);
   }
 
   /**
@@ -108,17 +134,7 @@ export default class TypeConf {
    */
   public withArgv(): TypeConf {
     const argv = require('minimist')(process.argv.slice(2));
-    const store = new Proxy(
-      {},
-      {
-        get: (_, name: string) => {
-          return argv[changeCase.camel(name)];
-        },
-        has: (_, name: string) => {
-          return changeCase.camel(name) in argv;
-        }
-      }
-    );
+    const store = createStore(argv, changeCase.camel);
 
     this.addStore(store, '__argv__');
     return this;
@@ -132,26 +148,64 @@ export default class TypeConf {
    * into CONSTANT_CASE. This means that environment variables must be
    * declared in CONSTANT_CASE.
    * @param prefix Prefix of environment variables.
+   * @param separator Separator string for nested properties.
    * @return This TypeConf instance.
    */
-  public withEnv(prefix: string = ''): TypeConf {
+  public withEnv(prefix: string = '', separator: string = '__'): TypeConf {
     const prefixValue = changeCase.constant(prefix);
+
     const getEnvName = (name: string) => {
       const keyValue = changeCase.constant(name);
       return prefixValue ? `${prefixValue}_${keyValue}` : keyValue;
     };
 
-    const store = new Proxy(
-      {},
-      {
-        get: (_, name: string) => {
-          return process.env[getEnvName(name)];
-        },
-        has: (_, name: string) => {
-          return getEnvName(name) in process.env;
-        }
+    const getPartialKeys = (envName: string) => {
+      return Object.keys(process.env).filter(
+        key => key.startsWith(envName) && key.includes(separator)
+      );
+    };
+
+    const assignNestedProperty = (
+      object: { [key: string]: any },
+      nestedKeys: string[],
+      value: any
+    ) => {
+      if (nestedKeys.length === 1) {
+        const [key] = nestedKeys;
+        object[key] = value;
+      } else {
+        const [key, ...rest] = nestedKeys;
+        object[key] = merge({}, object[key]);
+        assignNestedProperty(object[key], rest, value);
       }
-    );
+    };
+
+    const getNestedKeys = (key: string) =>
+      key.split(separator).slice(1).map(s => changeCase.camel(s));
+
+    const getPartial = (envName: string) => {
+      const partial = {};
+      for (const key of getPartialKeys(envName)) {
+        assignNestedProperty(partial, getNestedKeys(key), process.env[key]);
+      }
+      return partial;
+    };
+
+    const store: Store = {
+      get: (name, next) => {
+        const envName = getEnvName(name);
+        const result = process.env[envName];
+        if (result !== undefined) return result;
+
+        const partial = getPartial(envName);
+        return merge({}, next(name), partial);
+      },
+      has: (name, next) => {
+        const envName = getEnvName(name);
+        const result = envName in process.env || getPartialKeys(envName).length > 0;
+        return result || next(name, true);
+      }
+    };
 
     const storeName = prefixValue ? `ENV_${prefixValue}` : 'ENV';
     this.addStore(store, storeName);
@@ -168,18 +222,21 @@ export default class TypeConf {
       return this;
     }
     const filePath = path.resolve(process.cwd(), file);
-    this.addStore(readConfigFile(filePath), filePath);
+    const storage = readConfigFile(filePath);
+    const store = createStore(storage);
+    this.addStore(store, filePath);
     return this;
   }
 
   /**
    * Use an object as a source.
-   * @param store Object store to use.
+   * @param storage Object store to use.
    * @param name Optional name of the store.
    * @return This TypeConf instance.
    */
-  public withStore(store: Store, name: string = randomString()): TypeConf {
-    this.addStore(Object.assign({}, store), name);
+  public withStore(storage: { [key: string]: any }, name: string = randomString()): TypeConf {
+    const store = createStore(Object.assign({}, storage));
+    this.addStore(store, name);
     return this;
   }
 
@@ -190,17 +247,7 @@ export default class TypeConf {
    * @return This TypeConf instance.
    */
   public withSupplier(supplier: (key: string) => any, name: string = randomString()): TypeConf {
-    const store = new Proxy(
-      {},
-      {
-        get: (_, key: string) => {
-          return supplier(key);
-        },
-        has: (_, key: string) => {
-          return supplier(key) !== undefined;
-        }
-      }
-    );
+    const store = createStore(supplier);
     this.addStore(store, name);
     return this;
   }

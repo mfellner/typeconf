@@ -223,9 +223,9 @@ describe('TypeConf', () => {
   });
 
   test('respect store order', () => {
-    conf.withStore({ other: 'someValue' }, 'first');
-    conf.withStore({ example: 'firstValue' });
     conf.withStore({ example: 'secondValue' }, 'third');
+    conf.withStore({ example: 'firstValue' });
+    conf.withStore({ other: 'someValue' }, 'first');
     expect(conf.get('example')).toEqual('firstValue');
   });
 
@@ -264,5 +264,44 @@ describe('TypeConf', () => {
     process.env['TEST_EXAMPLE'] = 'value';
     conf.withEnv('test');
     expect(conf.get('example')).toEqual('value');
+  });
+
+  test('nested properties with environment variables', () => {
+    delete process.env['EXAMPLE'];
+    process.env['EXAMPLE__A'] = 'a';
+    process.env['EXAMPLE__C__C1'] = 'c1';
+    process.env['EXAMPLE__D__D0'] = 'd0';
+    process.env['EXAMPLE__E'] = 'e';
+    conf.withStore({
+      example: {
+        a: 1,
+        b: 2,
+        c: { c0: 'c0' }
+      }
+    });
+    conf.withEnv();
+    expect(conf.get('example')).toEqual({
+      a: 'a',
+      b: 2,
+      c: {
+        c0: 'c0',
+        c1: 'c1'
+      },
+      d: { d0: 'd0' },
+      e: 'e'
+    });
+  });
+
+  test('environment variable with only nested properties exists', () => {
+    process.env['PARTIAL_EXAMPLE__A'] = 'a';
+    conf.withEnv('partial');
+    expect(conf.getBoolean('example')).toBe(true);
+    expect(conf.get('example')).toEqual({ a: 'a' });
+  });
+
+  test('nested properties in evironment variables are camelCased', () => {
+    process.env['CAMEL_EXAMPLE__THIS_IS_A_CAMEL'] = 'camel';
+    conf.withEnv('camel');
+    expect(conf.get('example')).toEqual({ thisIsACamel: 'camel' });
   });
 });
