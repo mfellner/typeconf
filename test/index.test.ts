@@ -304,4 +304,16 @@ describe('TypeConf', () => {
     conf.withEnv('camel');
     expect(conf.get('example')).toEqual({ thisIsACamel: 'camel' });
   });
+
+  test('other values behind env storage are unaffected', () => {
+    process.env['COMBINATION_SOME'] = 'some';
+    conf
+      .withStore({
+        other: 'other'
+      })
+      .withEnv('COMBINATION');
+
+    expect(conf.getString('some')).toBe('some');
+    expect(conf.getString('other')).toBe('other');
+  });
 });
