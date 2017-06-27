@@ -198,7 +198,8 @@ export default class TypeConf {
         if (result !== undefined) return result;
 
         const partial = getPartial(envName);
-        return merge({}, next(name), partial);
+        if (Object.keys(partial).length > 0) return merge({}, next(name), partial);
+        else return next(name);
       },
       has: (name, next) => {
         const envName = getEnvName(name);
