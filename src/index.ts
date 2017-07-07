@@ -57,7 +57,7 @@ interface Store {
   has(name: string, next: Accessor): boolean;
 }
 
-type Storage = ({ [name: string]: any } | ((name: string) => any));
+type Storage = { [name: string]: any } | ((name: string) => any);
 
 function getValueOrNext(name: string, storage: Storage, next: Accessor): any {
   const value = typeof storage === 'function' ? storage(name) : storage[name];
@@ -392,17 +392,17 @@ export default class TypeConf {
    * @param Newable Constructor of the type to instantiate.
    * @param fallback Optional fallback value.
    */
-  public getType<T>(name: string, Newable: Newable<T>, fallback: T): T;
-  public getType<T>(name: string, Newable: Newable<T>, fallback?: T): T | undefined;
-  public getType<T>(name: string, Newable: Newable<T>, fallback?: T): T | undefined {
+  public getType<T>(name: string, newable: Newable<T>, fallback: T): T;
+  public getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined;
+  public getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined {
     const value = this.resolve(name);
     if (value === undefined && fallback !== undefined) {
       return fallback;
     }
     try {
-      return new Newable(value);
+      return new newable(value);
     } catch (e) {
-      throw new TypeError(`Cannot instantiate ${Newable.name} from ${value}.`, e);
+      throw new TypeError(`Cannot instantiate ${newable.name} from ${value}.`, e);
     }
   }
 }
