@@ -1,7 +1,7 @@
-import fs = require('fs');
-import path = require('path');
-import merge = require('lodash.merge');
 import changeCase = require('change-case');
+import fs = require('fs');
+import merge = require('lodash.merge');
+import path = require('path');
 
 function readFile(file: string, parser: (s: string) => any): object {
   try {
