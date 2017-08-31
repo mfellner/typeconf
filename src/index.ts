@@ -30,7 +30,9 @@ function readConfigFile(filePath: string): object {
 }
 
 function randomString(): string {
-  return Math.random().toString(36).substring(2, 10);
+  return Math.random()
+    .toString(36)
+    .substring(2, 10);
 }
 
 export class TypeError extends Error {
@@ -181,7 +183,10 @@ export default class TypeConf {
     };
 
     const getNestedKeys = (key: string) =>
-      key.split(separator).slice(1).map(s => changeCase.camel(s));
+      key
+        .split(separator)
+        .slice(1)
+        .map(s => changeCase.camel(s));
 
     const getPartial = (envName: string) => {
       const partial = {};
