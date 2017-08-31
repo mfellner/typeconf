@@ -26,24 +26,24 @@
     "prepublishOnly": "npm run dist"
   },
   "dependencies": {
-    "change-case": "3.0.1",
-    "lodash.merge": "4.6.0"
+    "change-case": "^3.0.1",
+    "lodash.merge": "^4.6.0"
   },
   "optionalDependencies": {
-    "js-yaml": "3.8.4",
-    "minimist": "1.2.0"
+    "js-yaml": "^3.9.1",
+    "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "@types/jest": "20.0.2",
-    "@types/lodash.merge": "4.6.2",
+    "@types/jest": "20.0.8",
+    "@types/lodash.merge": "4.6.3",
     "@types/minimist": "1.2.0",
-    "@types/node": "8.0.8",
+    "@types/node": "8.0.26",
     "jest": "20.0.4",
-    "prettier": "1.5.2",
+    "prettier": "1.6.1",
     "rimraf": "2.6.1",
-    "ts-jest": "20.0.7",
-    "tslint": "5.5.0",
-    "typescript": "2.4.1"
+    "ts-jest": "20.0.13",
+    "tslint": "5.7.0",
+    "typescript": "2.4.2"
   },
   "jest": {
     "testEnvironment": "node",
