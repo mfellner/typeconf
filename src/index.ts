@@ -401,7 +401,7 @@ export default class TypeConf {
   public getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined;
   public getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined {
     const value = this.resolve(name);
-    if (value === undefined && fallback !== undefined) {
+    if (value === undefined) {
       return fallback;
     }
     try {

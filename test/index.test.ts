@@ -179,6 +179,10 @@ describe('TypeConf', () => {
     expect(value.y).toBe(41);
   });
 
+  test('return undefined if a custom type value is undefined', () => {
+    expect(conf.getType('undefined', MyType)).toBeUndefined();
+  });
+
   test('throw a TypeError if a custom type cannot be instantiated', () => {
     conf.set('example', 42);
     expect(() => conf.getType('example', MyType)).toThrowErrorMatchingSnapshot();
