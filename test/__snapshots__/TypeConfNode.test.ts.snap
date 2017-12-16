@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TypeConfNode throw a TypeError for an illegal fallback number 1`] = `"Not a number: null"`;
+
+exports[`TypeConfNode throw a TypeError for an illegal fallback object 1`] = `"Not an object: 0"`;
+
+exports[`TypeConfNode throw a TypeError for an illegal fallback string 1`] = `"Not a string: null"`;
+
+exports[`TypeConfNode throw a TypeError for an illegal object 1`] = `"Not an object: value"`;
+
+exports[`TypeConfNode throw a TypeError for an non-number 1`] = `"Not a number: true"`;
+
+exports[`TypeConfNode throw a TypeError for an unparsable number 1`] = `"Not a number: value"`;
+
+exports[`TypeConfNode throw a TypeError if a custom type cannot be instantiated 1`] = `"Cannot instantiate MyType from 42."`;

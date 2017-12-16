@@ -21,12 +21,17 @@ const secret = conf.getString('secret');
 
 TypeConf supports different storage backends for configuration values:
 
-* **withArgv()** Command line arguments
-* **withEnv(prefix?: string)** Environment variables
-* **withFile(file: string)** JSON or YAML files
+All versions:
+
 * **withStore(store: object, name?: string)** JavaScript object
 * **withSupplier(supplier: (key: string) => any, name?: string)** Supplier function
 * **set(key: string, value: any)** Override a value
+
+Node.js only:
+
+* **withArgv()** Command line arguments (requires `minimist`)
+* **withEnv(prefix?: string)** Environment variables
+* **withFile(file: string)** JSON or YAML files (.yaml files require `js-yaml`)
 
 Backends are queried for existing values in the reverse order that they were added. For example:
 
