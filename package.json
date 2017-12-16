@@ -4,9 +4,13 @@
   "description": "A typesafe hierarchical configuration manager for Node.js and the browser.",
   "browser": "dist/TypeConf.js",
   "main": "dist/TypeConfNode.js",
+  "types": "./dist/TypeConfNode.d.ts",
   "repository": "https://github.com/mfellner/typeconf",
   "author": "Maximilian Fellner <max.fellner@gmail.com>",
   "license": "MIT",
+  "files": [
+    "dist/"
+  ],
   "keywords": [
     "configuration",
     "settings",
