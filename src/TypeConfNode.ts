@@ -41,7 +41,7 @@ export default class TypeConfNode extends TypeConf {
    * declared in camelCase.
    * @return This TypeConf instance.
    */
-  public withArgv(): TypeConf {
+  public withArgv(): TypeConfNode {
     const argv = require('minimist')(process.argv.slice(2));
     const store = createStore(argv, camelCase);
 
@@ -60,7 +60,7 @@ export default class TypeConfNode extends TypeConf {
    * @param separator Separator string for nested properties.
    * @return This TypeConf instance.
    */
-  public withEnv(prefix: string = '', separator: string = '__'): TypeConf {
+  public withEnv(prefix: string = '', separator: string = '__'): TypeConfNode {
     const prefixValue = constantCase(prefix);
 
     const getEnvName = (name: string) => {
@@ -130,7 +130,7 @@ export default class TypeConfNode extends TypeConf {
    * @param file The absolute or relative file path.
    * @return This TypeConf instance.
    */
-  public withFile(file: string): TypeConf {
+  public withFile(file: string): TypeConfNode {
     if (!file) {
       return this;
     }
