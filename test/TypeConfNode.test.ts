@@ -1,12 +1,12 @@
 /// <reference types="jest" />
 
 import path = require('path');
-import TypeConf from '../src';
+import TypeConfNode from '../src/TypeConfNode';
 
-describe('TypeConf', () => {
-  let conf: TypeConf;
+describe('TypeConfNode', () => {
+  let conf: TypeConfNode;
 
-  beforeEach(() => (conf = new TypeConf()));
+  beforeEach(() => (conf = new TypeConfNode()));
 
   test('load a JSON file', () => {
     conf.withFile(path.resolve(__dirname, 'conf.json'));
@@ -27,25 +27,25 @@ describe('TypeConf', () => {
     const mockError = jest.fn();
     global.console.error = mockError;
     const empty = path.resolve(__dirname, 'empty.yaml');
-    expect(conf.withFile(empty) instanceof TypeConf).toBe(true);
+    expect(conf.withFile(empty) instanceof TypeConfNode).toBe(true);
     expect(mockError).toBeCalled();
   });
 
   test('reject empty file paths gracefully', () => {
-    expect(conf.withFile('') instanceof TypeConf).toBe(true);
+    expect(conf.withFile('') instanceof TypeConfNode).toBe(true);
   });
 
   test('reject unsupported files gracefully', () => {
     const mockError = jest.fn();
     global.console.error = mockError;
-    expect(conf.withFile(__filename) instanceof TypeConf).toBe(true);
+    expect(conf.withFile(__filename) instanceof TypeConfNode).toBe(true);
     expect(mockError).toBeCalled();
   });
 
   test('reject unreadable files gracefully', () => {
     const mockError = jest.fn();
     global.console.error = mockError;
-    expect(conf.withFile('unreadable.json') instanceof TypeConf).toBe(true);
+    expect(conf.withFile('unreadable.json') instanceof TypeConfNode).toBe(true);
     expect(mockError).toBeCalled();
   });
 

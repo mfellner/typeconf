@@ -1,9 +1,9 @@
 {
   "name": "typeconf",
   "version": "0.4.2",
-  "description": "A typesafe hierarchical configuration manager for Node.js.",
-  "main": "dist/index.js",
-  "types": "./dist/index.d.ts",
+  "description": "A typesafe hierarchical configuration manager for Node.js and the browser.",
+  "browser": "dist/TypeConf.js",
+  "main": "dist/TypeConfNode.js",
   "repository": "https://github.com/mfellner/typeconf",
   "author": "Maximilian Fellner <max.fellner@gmail.com>",
   "license": "MIT",
@@ -26,7 +26,8 @@
     "prepublishOnly": "npm run dist"
   },
   "dependencies": {
-    "change-case": "^3.0.1",
+    "camel-case": "^3.0.0",
+    "constant-case": "^2.0.0",
     "lodash.merge": "^4.6.0"
   },
   "optionalDependencies": {
@@ -34,16 +35,16 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "@types/jest": "21.1.5",
+    "@types/jest": "21.1.8",
     "@types/lodash.merge": "4.6.3",
     "@types/minimist": "1.2.0",
-    "@types/node": "8.0.47",
+    "@types/node": "8.5.1",
     "jest": "21.2.1",
-    "prettier": "1.7.4",
+    "prettier": "1.9.2",
     "rimraf": "2.6.2",
-    "ts-jest": "21.1.3",
+    "ts-jest": "21.2.4",
     "tslint": "5.8.0",
-    "typescript": "2.5.3"
+    "typescript": "2.6.2"
   },
   "jest": {
     "testEnvironment": "node",
