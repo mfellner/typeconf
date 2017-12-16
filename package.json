@@ -1,6 +1,6 @@
 {
   "name": "typeconf",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "A typesafe hierarchical configuration manager for Node.js and the browser.",
   "browser": "dist/TypeConf.js",
   "main": "dist/TypeConfNode.js",
