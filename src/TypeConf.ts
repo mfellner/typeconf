@@ -77,6 +77,27 @@ export default class TypeConf {
   }
 
   /**
+   * Node.js stub.
+   */
+  public withArgv(): TypeConf {
+    return this;
+  }
+
+  /**
+   * Node.js stub.
+   */
+  public withEnv(_prefix?: string, _separator?: string): TypeConf {
+    return this;
+  }
+
+  /**
+   * Node.js stub.
+   */
+  public withFile(_file: string): TypeConf {
+    return this;
+  }
+
+  /**
    * Set an override value.
    * @param key Name of the value.
    * @param value Actual value.

@@ -1,5 +1,3 @@
-/// <reference types="jest" />
-
 import path = require('path');
 import TypeConfNode from '../src/TypeConfNode';
 
