@@ -1,10 +1,10 @@
 # Example config file
-array:
-  - one
-  - two
-object:
-  whatIsCode: 42
-  tautology: true
-example: value
+string: string
 number: 42
 boolean: true
+object:
+  string: string
+array:
+  string
+  42
+  true

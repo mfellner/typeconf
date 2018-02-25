@@ -11,12 +11,12 @@ export interface Store {
 
 export type Storage = { [name: string]: any } | ((name: string) => any);
 
-function getValueOrNext(name: string, storage: Storage, next: Accessor): any {
+export function getValueOrNext(name: string, storage: Storage, next: Accessor): any {
   const value = typeof storage === 'function' ? storage(name) : storage[name];
   return value !== undefined ? value : next(name);
 }
 
-function peekValueOrNext(name: string, storage: Storage, next: Accessor): boolean {
+export function peekValueOrNext(name: string, storage: Storage, next: Accessor): boolean {
   const exists = typeof storage === 'function' ? storage(name) !== undefined : name in storage;
   return exists || next(name, true);
 }

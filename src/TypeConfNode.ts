@@ -4,6 +4,7 @@ import fs = require('fs');
 import merge = require('lodash.merge');
 import path = require('path');
 import TypeConf from './TypeConf';
+import TypeConfBase from './TypeConfBase';
 import { createStore, Store } from './util';
 
 function readFile(file: string, parser: (s: string) => any): object {
@@ -32,16 +33,8 @@ function readConfigFile(filePath: string): object {
   }
 }
 
-export default class TypeConfNode extends TypeConf {
-  /**
-   * Use command line arguments as a source.
-   *
-   * When looking up argument names, all names will be transformed
-   * into camelCase. This means that arguments names must be
-   * declared in camelCase.
-   * @return This TypeConf instance.
-   */
-  public withArgv(): TypeConfNode {
+export default class TypeConfNode extends TypeConfBase {
+  public withArgv(): TypeConf {
     const argv = require('minimist')(process.argv.slice(2));
     const store = createStore(argv, camelCase);
 
@@ -49,18 +42,7 @@ export default class TypeConfNode extends TypeConf {
     return this;
   }
 
-  /**
-   * Use environment variables as a source. If a prefix is configured,
-   * it will be prepended to configuration value names during lookup.
-   *
-   * When looking up environment variables, all names will be transformed
-   * into CONSTANT_CASE. This means that environment variables must be
-   * declared in CONSTANT_CASE.
-   * @param prefix Prefix of environment variables.
-   * @param separator Separator string for nested properties.
-   * @return This TypeConf instance.
-   */
-  public withEnv(prefix: string = '', separator: string = '__'): TypeConfNode {
+  public withEnv(prefix: string = '', separator: string = '__'): TypeConf {
     const prefixValue = constantCase(prefix);
 
     const getEnvName = (name: string) => {
@@ -125,11 +107,6 @@ export default class TypeConfNode extends TypeConf {
     return this;
   }
 
-  /**
-   * Use a configuration file as a source. JSON and YAML are supported.
-   * @param file The absolute or relative file path.
-   * @return This TypeConf instance.
-   */
   public withFile(file: string): TypeConfNode {
     if (!file) {
       return this;

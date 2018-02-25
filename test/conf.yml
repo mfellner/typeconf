@@ -1,2 +1,10 @@
-# Another example config file
-ymlSupported: true
+# Example config file
+string: string
+number: 42
+boolean: true
+object:
+  string: string
+array:
+  string
+  42
+  true
