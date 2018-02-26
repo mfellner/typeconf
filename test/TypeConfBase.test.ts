@@ -229,7 +229,15 @@ describe('TypeConfBase', () => {
     );
   });
 
-  test('TypeConfBase.getType from string should trhow', () => {
+  test('TypeConfBase.getType from string should throw', () => {
     expect(() => conf.getType('bool', StringNewable)).toThrowError(TypeError);
+  });
+
+  test('TypeConfBase.toJSON', () => {
+    conf = new TypeConfBaseImpl()
+      .withStore({ w: 'w', x: 'x' })
+      .withStore({ y: 'y', z: { a: 1 } })
+      .withStore({ x: null });
+    expect(conf.toJSON()).toEqual({ w: 'w', x: null, y: 'y', z: { a: 1 } });
   });
 });

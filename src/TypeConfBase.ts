@@ -11,6 +11,7 @@ import {
   baseAccessor,
   createAccessor,
   createStore,
+  ObjectSupplier,
   randomString,
   Resolver,
   Store
@@ -47,13 +48,18 @@ export default abstract class TypeConfBase implements TypeConf {
   }
 
   public withStore(storage: { [key: string]: any }, name: string = randomString()): TypeConf {
-    const store = createStore({ ...storage });
+    const store = createStore(new ObjectSupplier(storage));
     this.addStore(store, name);
     return this;
   }
 
   public withSupplier(supplier: (key: string) => any, name: string = randomString()): TypeConf {
-    const store = createStore(supplier);
+    const store = createStore({
+      get: supplier,
+      aggregate() {
+        return {}; // FIXME
+      }
+    });
     this.addStore(store, name);
     return this;
   }
@@ -137,7 +143,7 @@ export default abstract class TypeConfBase implements TypeConf {
   public toJSON(): object {
     const aggregate: object = {};
     for (const store of Object.values(this.stores)) {
-      merge(aggregate, store);
+      merge(aggregate, store.aggregate());
     }
     return aggregate;
   }

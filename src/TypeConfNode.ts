@@ -5,7 +5,7 @@ import merge = require('lodash.merge');
 import path = require('path');
 import TypeConf from './TypeConf';
 import TypeConfBase from './TypeConfBase';
-import { createStore } from './util';
+import { createStore, ObjectSupplier } from './util';
 
 function readFile(file: string, parser: (s: string) => any): object {
   try {
@@ -36,7 +36,7 @@ function readConfigFile(filePath: string): object {
 export default class TypeConfNode extends TypeConfBase {
   public withArgv(): TypeConf {
     const argv = require('minimist')(process.argv.slice(2));
-    const store = createStore(argv, camelCase);
+    const store = createStore(new ObjectSupplier(argv), camelCase);
 
     this.addStore(store, '__argv__');
     return this;
@@ -45,17 +45,30 @@ export default class TypeConfNode extends TypeConfBase {
   public withEnv(prefix: string = '', separator: string = '__'): TypeConf {
     const prefixValue = constantCase(prefix);
 
+    // Transform a configuration value name into an environment variable name.
     const getEnvName = (name: string) => {
       const keyValue = constantCase(name);
       return prefixValue ? `${prefixValue}_${keyValue}` : keyValue;
     };
 
+    // Transform an environment variable name into a configuration value name.
+    const getConfName = (name: string) => {
+      const camelName = camelCase(name);
+      if (prefix) {
+        return camelCase(camelName.replace(camelCase(prefix), ''));
+      } else {
+        return camelName;
+      }
+    };
+
+    // Collect all environment variable names that belong to the same object.
     const getPartialKeys = (envName: string) => {
       return Object.keys(process.env).filter(
         key => key.startsWith(envName) && key.includes(separator)
       );
     };
 
+    // Recursively construct an object from nested properties.
     const assignNestedProperty = (
       object: { [key: string]: any },
       nestedKeys: string[],
@@ -89,11 +102,27 @@ export default class TypeConfNode extends TypeConfBase {
       return partial;
     };
 
-    const store = createStore(name => {
-      const envName = getEnvName(name);
-      const result = process.env[envName];
-      if (result !== undefined) return result;
-      return getPartial(envName);
+    const store = createStore({
+      get(name: string) {
+        const envName = getEnvName(name);
+        const result = process.env[envName];
+        if (result !== undefined) return result;
+        return getPartial(envName);
+      },
+      aggregate() {
+        // We can only find relevant environment variables if a prefix is specified.
+        if (!prefixValue) {
+          return {};
+        }
+        // Collect relevant environment variable names that start with the specified prefix.
+        const keys = Object.keys(process.env).filter(key => key.startsWith(prefixValue));
+        // Aggregate environment variables into an object.
+        return keys.reduce(
+          // FIXME: construct partial objects
+          (aggregated, key) => ({ ...aggregated, [getConfName(key)]: process.env[key] }),
+          {}
+        );
+      }
     });
 
     const storeName = prefixValue ? `ENV_${prefixValue}` : 'ENV';
@@ -107,7 +136,7 @@ export default class TypeConfNode extends TypeConfBase {
     }
     const filePath = path.resolve(process.cwd(), file);
     const storage = readConfigFile(filePath);
-    const store = createStore(storage);
+    const store = createStore(new ObjectSupplier(storage));
     super.addStore(store, filePath);
     return this;
   }

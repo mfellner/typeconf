@@ -11,19 +11,51 @@ export interface Accessor {
 export interface Store {
   get<T>(name: string, next: Accessor, resolve?: Resolver<T>): T | undefined;
   has(name: string, next: Accessor): boolean;
+  aggregate(): ObjectStorage;
 }
 
-export type Storage = { [name: string]: any } | ((name: string) => any);
+export type ObjectStorage = { [name: string]: any };
+
+export interface Supplier {
+  get(name: string): any;
+  aggregate(): ObjectStorage;
+}
+
+export function isSupplier(value: any): value is Supplier {
+  return (
+    typeof value === 'object' &&
+    'get' in value &&
+    typeof value.get === 'function' &&
+    'aggregate' in value &&
+    typeof value.aggregate === 'function'
+  );
+}
+
+export class ObjectSupplier implements Supplier {
+  private readonly storage: ObjectStorage;
+
+  constructor(storage: ObjectStorage) {
+    this.storage = { ...storage };
+  }
+
+  public get(name: string): any {
+    return this.storage[name];
+  }
+
+  public aggregate(): ObjectStorage {
+    return { ...this.storage };
+  }
+}
 
 export type Resolver<T> = (value?: any) => T | undefined;
 
 export function getValueOrNext<T>(
   name: string,
-  storage: Storage,
+  supplier: Supplier,
   next: Accessor,
   resolve: Resolver<T> = (_: any) => _
 ): T | undefined {
-  const value = resolve(typeof storage === 'function' ? storage(name) : storage[name]);
+  const value = resolve(supplier.get(name));
   if (value === undefined) {
     return next(name, resolve);
   }
@@ -37,19 +69,24 @@ export function getValueOrNext<T>(
   return value;
 }
 
-export function peekValueOrNext(name: string, storage: Storage, next: Accessor): boolean {
-  const exists = typeof storage === 'function' ? storage(name) !== undefined : name in storage;
-  return exists || next(name, true);
+export function peekValueOrNext(name: string, supplier: Supplier, next: Accessor): boolean {
+  return typeof supplier.get(name) !== 'undefined' || next(name, true);
 }
 
 export function createStore(
-  storage: Storage,
+  supplier: Supplier,
   nameModifier: (name: string) => string = _ => _
 ): Store {
   return {
-    get: <T>(name: string, next: Accessor, resolve?: Resolver<T>) =>
-      getValueOrNext(nameModifier(name), storage, next, resolve),
-    has: (name: string, next: Accessor) => peekValueOrNext(nameModifier(name), storage, next)
+    get<T>(name: string, next: Accessor, resolve?: Resolver<T>) {
+      return getValueOrNext(nameModifier(name), supplier, next, resolve);
+    },
+    has(name: string, next: Accessor) {
+      return peekValueOrNext(nameModifier(name), supplier, next);
+    },
+    aggregate() {
+      return supplier.aggregate();
+    }
   };
 }
 

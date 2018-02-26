@@ -1,7 +1,7 @@
 import StoreError from './StoreError';
 import TypeConf from './TypeConf';
 import TypeConfBase from './TypeConfBase';
-import { createStore } from './util';
+import { createStore, ObjectSupplier } from './util';
 
 export default class TypeConfBrowser extends TypeConfBase {
   public withDOMNode(id: string): TypeConf {
@@ -19,7 +19,7 @@ export default class TypeConfBrowser extends TypeConfBase {
     } catch (e) {
       throw new StoreError(`cannot read value of DOM node ${id}`, e);
     }
-    const store = createStore(name => storage[name]);
+    const store = createStore(new ObjectSupplier(storage));
     this.addStore(store, `__DOM_${id}__`);
     return this;
   }

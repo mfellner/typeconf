@@ -108,7 +108,7 @@ describe('TypeConfNode', () => {
     expect(conf.getNumber('number')).toEqual(42);
   });
 
-  test('conf with empty YAML file', () => {
+  test('with empty YAML file', () => {
     const mockError = jest.fn();
     global.console.error = mockError;
     expect(new TypeConfNode().withFile(path.resolve(__dirname, 'empty.yaml'))).toBeInstanceOf(
@@ -117,7 +117,7 @@ describe('TypeConfNode', () => {
     expect(mockError).toBeCalled();
   });
 
-  test('conf with empty JSON file', () => {
+  test('with empty JSON file', () => {
     const mockError = jest.fn();
     global.console.error = mockError;
     expect(new TypeConfNode().withFile(path.resolve(__dirname, 'empty.json'))).toBeInstanceOf(
@@ -126,7 +126,7 @@ describe('TypeConfNode', () => {
     expect(mockError).toBeCalled();
   });
 
-  test('conf with empty YAML file', () => {
+  test('with empty YAML file', () => {
     const mockError = jest.fn();
     global.console.error = mockError;
     expect(new TypeConfNode().withFile(path.resolve(__dirname, 'empty.yaml'))).toBeInstanceOf(
@@ -135,7 +135,7 @@ describe('TypeConfNode', () => {
     expect(mockError).toBeCalled();
   });
 
-  test('conf with unsupported file', () => {
+  test('with unsupported file', () => {
     const mockError = jest.fn();
     global.console.error = mockError;
     expect(new TypeConfNode().withFile(path.resolve(__dirname, 'conf.txt'))).toBeInstanceOf(
@@ -144,7 +144,18 @@ describe('TypeConfNode', () => {
     expect(mockError).toBeCalled();
   });
 
-  test('conf with empty file name', () => {
+  test('with empty file name', () => {
     expect(new TypeConfNode().withFile('')).toBeInstanceOf(TypeConfNode);
+  });
+
+  test('conf.toJSON withEnv', () => {
+    const conf = new TypeConfNode().withEnv('typeConf');
+    process.env['TYPE_CONF_A'] = 'a';
+    process.env['TYPE_CONF_B'] = '42';
+    process.env['TYPE_CONF_C__AA'] = 'aa';
+    process.env['TYPE_CONF_C__BB'] = 'bb';
+    process.env['TYPE_CONF_D'] = 'd';
+
+    expect(conf.toJSON()).toEqual({ a: 'a', b: '42', c: { aa: 'aa', bb: 'bb' }, d: 'd' });
   });
 });
