@@ -21,6 +21,10 @@ describe('TypeConfBase', () => {
     expect(() => new TypeConfBaseImpl().withFile('')).toThrowError(/not implemented/);
   });
 
+  test('withDOMNode should throw', () => {
+    expect(() => new TypeConfBaseImpl().withDOMNode('')).toThrowError(/not implemented/);
+  });
+
   function getTestArgs(): TestArgs[] {
     const storage = Object.freeze({
       string: 'test',
@@ -57,8 +61,8 @@ describe('TypeConfBase', () => {
                 stringifiedObject: storage.stringifiedObject
               }[name])
           )
-          .set('object', { override: 'override' }),
-        storage: { ...storage, object: { override: 'override' } }
+          .set('string', 'override'),
+        storage: { ...storage, string: 'override' }
       }
     ];
   }
@@ -95,14 +99,14 @@ describe('TypeConfBase', () => {
     });
 
     test(`TypeConfBase.set (${name})`, () => {
-      expect(conf.set('string', 'override').get('string')).toEqual('override');
+      expect(conf.set('number', 'override').get('number')).toEqual('override');
     });
 
     test(`TypeConfBase.unset (${name})`, () => {
       expect(
         conf
-          .set('string', 'override')
-          .unset('string')
+          .set('number', 'override')
+          .unset('number')
           .get('string')
       ).toEqual(storage['string']);
     });
@@ -176,6 +180,20 @@ describe('TypeConfBase', () => {
 
     test(`TypeConfBase.getObject with fallback (${name})`, () => {
       expect(conf.getObject('none', { fallback: 42 })).toEqual({ fallback: 42 });
+    });
+
+    test(`TypeConfBase.getObject should merge objects (${name})`, () => {
+      expect(
+        conf
+          .withStore({ object: { test: null, other: null, another: null } })
+          .withStore({ object: { test: 'test 42' } })
+          .withStore({ object: { other: 'other' } }) // highest precedence
+          .getObject('object')
+      ).toEqual({
+        test: 'test 42',
+        other: 'other',
+        another: null
+      });
     });
 
     test(`TypeConfBase.getObject with fallback should throw (${name})`, () => {

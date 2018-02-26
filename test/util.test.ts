@@ -1,93 +1,112 @@
 import * as util from '../src/util';
 
+const baseAccessor: util.Accessor = <T>(name: string, arg1: true | util.Resolver<T> = _ => _) =>
+  arg1 === true ? false : undefined;
+
 test('getValueOrNext with object storage and existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.getValueOrNext('test', { test: 42 }, accessor);
   expect(value).toBe(42);
   expect(accessor).not.toHaveBeenCalled();
 });
 
 test('getValueOrNext with function storage and existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.getValueOrNext('test', name => ({ test: 42 }[name]), accessor);
   expect(value).toBe(42);
   expect(accessor).not.toHaveBeenCalled();
 });
 
 test('getValueOrNext with object storage and non-existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.getValueOrNext('test', {}, accessor);
   expect(value).toBeUndefined();
-  expect(accessor).toHaveBeenCalledWith('test');
+  expect(accessor).toHaveBeenCalledWith('test', expect.any(Function));
 });
 
 test('getValueOrNext with function storage and non-existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.getValueOrNext('test', name => ({}[name]), accessor);
   expect(value).toBeUndefined();
-  expect(accessor).toHaveBeenCalledWith('test');
+  expect(accessor).toHaveBeenCalledWith('test', expect.any(Function));
+});
+
+test('getValueOrNext with resolver', () => {
+  const accessor = jest.fn(baseAccessor);
+  const value = util.getValueOrNext('test', { test: '42' }, accessor, parseInt);
+  expect(value).toBe(42);
+});
+
+test('getValueOrNext should merge objects', () => {
+  const accessor = (name: string, _: any) => ({ object: { y: null, z: 'z' } }[name]);
+  const value = util.getValueOrNext('object', { object: { x: 'x', y: 'y' } }, accessor);
+  expect(value).toEqual({ x: 'x', y: 'y', z: 'z' });
+});
+
+test('getValueOrNext should not merge non-objects', () => {
+  const accessor = (name: string, _: any) => ({ object: [1, 2, 3] }[name]);
+  const value = util.getValueOrNext('object', { object: { x: 'x' } }, accessor);
+  expect(value).toEqual({ x: 'x' });
 });
 
 test('peekValueOrNext with object storage and existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.peekValueOrNext('test', { test: 0 }, accessor);
   expect(value).toBe(true);
   expect(accessor).not.toHaveBeenCalled();
 });
 
 test('peekValueOrNext with function storage and existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.peekValueOrNext('test', name => ({ test: 0 }[name]), accessor);
   expect(value).toBe(true);
   expect(accessor).not.toHaveBeenCalled();
 });
 
 test('peekValueOrNext with object storage and non-existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.peekValueOrNext('test', {}, accessor);
   expect(value).toBe(false);
   expect(accessor).toHaveBeenCalledWith('test', true);
 });
 
 test('peekValueOrNext with function storage and non-existing key', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
+  const accessor = jest.fn(baseAccessor);
   const value = util.peekValueOrNext('test', name => ({}[name]), accessor);
   expect(value).toBe(false);
   expect(accessor).toHaveBeenCalledWith('test', true);
 });
 
 test('createStore without modifier', () => {
-  const accessor = jest.fn((name: string, peek: boolean) => (peek ? false : undefined));
   const store = util.createStore({ test: 42 });
-  expect(store.get('test', accessor)).toBe(42);
-  expect(store.get('none', accessor)).toBeUndefined();
-  expect(store.has('test', accessor)).toBe(true);
-  expect(store.has('none', accessor)).toBe(false);
+  expect(store.get('test', baseAccessor)).toBe(42);
+  expect(store.get('none', baseAccessor)).toBeUndefined();
+  expect(store.has('test', baseAccessor)).toBe(true);
+  expect(store.has('none', baseAccessor)).toBe(false);
 });
 
 test('createStore with modifier', () => {
-  const accessor = (name: string, peek: boolean) => (peek ? false : undefined);
   const modifier = jest.fn((name: string) => name.toUpperCase());
   const store = util.createStore({ TEST: 42 }, modifier);
 
-  expect(store.get('test', accessor)).toBe(42);
+  expect(store.get('test', baseAccessor)).toBe(42);
   expect(modifier).toHaveBeenCalledWith('test');
   modifier.mockClear();
 
-  expect(store.get('none', accessor)).toBeUndefined();
+  expect(store.get('none', baseAccessor)).toBeUndefined();
   expect(modifier).toHaveBeenCalledWith('none');
   modifier.mockClear();
 
-  expect(store.has('test', accessor)).toBe(true);
+  expect(store.has('test', baseAccessor)).toBe(true);
   expect(modifier).toHaveBeenCalledWith('test');
   modifier.mockClear();
 
-  expect(store.has('none', accessor)).toBe(false);
+  expect(store.has('none', baseAccessor)).toBe(false);
   expect(modifier).toHaveBeenCalledWith('none');
 });
 
 test('createAccessor', () => {
-  const nextAccessor = (name: string, peek: boolean) => (peek ? false : undefined);
+  const nextAccessor = jest.fn(baseAccessor);
   const store = util.createStore({ test: 42 });
   const accessor = util.createAccessor(store, nextAccessor);
   expect(accessor('test')).toBe(42);
@@ -98,5 +117,11 @@ test('createAccessor', () => {
 
 test('baseAccessor', () => {
   expect(util.baseAccessor('test')).toBeUndefined();
+  expect(util.baseAccessor('test', _ => _)).toBeUndefined();
   expect(util.baseAccessor('test', true)).toBe(false);
+});
+
+test('randomString', () => {
+  expect(typeof util.randomString() === 'string').toBe(true);
+  expect(util.randomString()).toHaveLength(8);
 });

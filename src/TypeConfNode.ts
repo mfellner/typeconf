@@ -5,7 +5,7 @@ import merge = require('lodash.merge');
 import path = require('path');
 import TypeConf from './TypeConf';
 import TypeConfBase from './TypeConfBase';
-import { createStore, Store } from './util';
+import { createStore } from './util';
 
 function readFile(file: string, parser: (s: string) => any): object {
   try {
@@ -78,29 +78,23 @@ export default class TypeConfNode extends TypeConfBase {
         .map(s => camelCase(s));
 
     const getPartial = (envName: string) => {
+      const keys = getPartialKeys(envName);
+      if (keys.length === 0) {
+        return;
+      }
       const partial = {};
-      for (const key of getPartialKeys(envName)) {
+      for (const key of keys) {
         assignNestedProperty(partial, getNestedKeys(key), process.env[key]);
       }
       return partial;
     };
 
-    const store: Store = {
-      get: (name, next) => {
-        const envName = getEnvName(name);
-        const result = process.env[envName];
-        if (result !== undefined) return result;
-
-        const partial = getPartial(envName);
-        if (Object.keys(partial).length > 0) return merge({}, next(name), partial);
-        else return next(name);
-      },
-      has: (name, next) => {
-        const envName = getEnvName(name);
-        const result = envName in process.env || getPartialKeys(envName).length > 0;
-        return result || next(name, true);
-      }
-    };
+    const store = createStore(name => {
+      const envName = getEnvName(name);
+      const result = process.env[envName];
+      if (result !== undefined) return result;
+      return getPartial(envName);
+    });
 
     const storeName = prefixValue ? `ENV_${prefixValue}` : 'ENV';
     this.addStore(store, storeName);

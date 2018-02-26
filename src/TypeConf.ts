@@ -60,25 +60,15 @@ export interface TypeConf {
   withFile(file: string): TypeConf;
 
   /**
-   * Node.js stub.
+   * Use a DOM element with a `value` attribute as a source.
+   * The value must be a Base64-encoded JSON string.
+   *
+   * Browser only.
+   *
+   * @param id ID attribute of the DOM element.
+   * @return This TypeConf instance.
    */
-  public withArgv(): TypeConf {
-    return this;
-  }
-
-  /**
-   * Node.js stub.
-   */
-  public withEnv(_prefix?: string, _separator?: string): TypeConf {
-    return this;
-  }
-
-  /**
-   * Node.js stub.
-   */
-  public withFile(_file: string): TypeConf {
-    return this;
-  }
+  withDOMNode(id: string): TypeConf;
 
   /**
    * Set an override value.
@@ -161,6 +151,10 @@ export interface TypeConf {
   getType<T>(name: string, newable: Newable<T>, fallback: T): T;
   getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined;
   getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined;
+
+  toJSON(): object;
+
+  toBase64(): string;
 }
 
 export default TypeConf;

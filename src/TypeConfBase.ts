@@ -1,13 +1,16 @@
+import merge = require('lodash.merge');
 import Newable from './Newable';
 import TypeConf from './TypeConf';
 import TypeError from './TypeError';
-import { Accessor, baseAccessor, createAccessor, createStore, Store } from './util';
-
-function randomString(): string {
-  return Math.random()
-    .toString(36)
-    .substring(2, 10);
-}
+import {
+  Accessor,
+  baseAccessor,
+  createAccessor,
+  createStore,
+  randomString,
+  Resolver,
+  Store
+} from './util';
 
 export default abstract class TypeConfBase implements TypeConf {
   private readonly override: { [key: string]: any };
@@ -20,11 +23,11 @@ export default abstract class TypeConfBase implements TypeConf {
     this.rootAccessor = baseAccessor;
   }
 
-  private resolve(name: string): any {
+  private resolve<T>(name: string, resolve?: Resolver<T>): T | undefined {
     if (name in this.override) {
       return this.override[name];
     }
-    return this.rootAccessor(name, false);
+    return this.rootAccessor(name, resolve);
   }
 
   private exists(name: string): boolean {
@@ -61,6 +64,10 @@ export default abstract class TypeConfBase implements TypeConf {
 
   public withFile(_: string): TypeConf {
     throw new Error('not implemented: withEnv');
+  }
+
+  public withDOMNode(_: string): TypeConf {
+    throw new Error('not implemented: withDOMNode');
   }
 
   public set(key: string, value: any): TypeConf {
@@ -168,5 +175,17 @@ export default abstract class TypeConfBase implements TypeConf {
     } catch (e) {
       throw new TypeError(`Cannot instantiate ${newable.name} from ${value}.`, e);
     }
+  }
+
+  public toJSON(): object {
+    const aggregate: object = {};
+    for (const store of Object.values(this.stores)) {
+      merge(aggregate, store);
+    }
+    return aggregate;
+  }
+
+  public toBase64(): string {
+    throw new Error('not implemented: toBase64');
   }
 }

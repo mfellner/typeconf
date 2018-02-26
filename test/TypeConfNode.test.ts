@@ -1,7 +1,5 @@
-import path = require('path');
-import TypeConf from '../src/TypeConf';
+import * as path from 'path';
 import TypeConfNode from '../src/TypeConfNode';
-import TypeError from '../src/TypeError';
 
 describe('TypeConfNode', () => {
   beforeEach(() => {
@@ -12,31 +10,40 @@ describe('TypeConfNode', () => {
     }
   });
 
-  test('withArgv', () => {
+  test('conf.getNumber withArgv', () => {
     process.argv.push('--number', '42');
+    const conf = new TypeConfNode().withArgv();
+    expect(conf.getNumber('number')).toEqual(42);
+  });
+
+  test('conf.getString withArgv', () => {
     process.argv.push('--string=test');
     const conf = new TypeConfNode().withArgv();
-
-    expect(conf.getNumber('number')).toEqual(42);
     expect(conf.getString('string')).toEqual('test');
   });
 
-  test('withEnv', () => {
+  test('withArgv should transform keys to camelCase', () => {
+    process.argv.push('--camelCaseString=test');
+    const conf = new TypeConfNode().withArgv();
+    expect(conf.getString('CAMEL_CASE_STRING')).toEqual('test');
+  });
+
+  test('conf.getNumber withEnv', () => {
     const conf = new TypeConfNode().withEnv();
     process.env['TYPE_CONF_TEST_NUMBER'] = '42';
-    process.env['TYPE_CONF_TEST_STRING'] = 'test';
-
     expect(conf.getNumber('typeConfTestNumber')).toEqual(42);
+  });
+
+  test('conf.getString withEnv', () => {
+    const conf = new TypeConfNode().withEnv();
+    process.env['TYPE_CONF_TEST_STRING'] = 'test';
     expect(conf.get('TYPE_CONF_TEST_STRING')).toEqual('test');
   });
 
-  test('withEnv and prefix', () => {
+  test('conf.getNumber withEnv and prefix', () => {
     const conf = new TypeConfNode().withEnv('TYPE_CONF_PREFIX');
     process.env['TYPE_CONF_PREFIX_NUMBER'] = '42';
-    process.env['TYPE_CONF_PREFIX_STRING'] = 'test';
-
     expect(conf.getNumber('number')).toEqual(42);
-    expect(conf.get('string')).toEqual('test');
   });
 
   test('conf.getObject withEnv and nested keys', () => {
