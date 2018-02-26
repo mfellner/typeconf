@@ -1,4 +1,6 @@
 import merge = require('lodash.merge');
+import Newable from './Newable';
+import TypeError from './TypeError';
 
 export interface Accessor {
   (name: string, peek: true): boolean;
@@ -26,7 +28,7 @@ export function getValueOrNext<T>(
     return next(name, resolve);
   }
   // Merge multiple object-values with the same name in hierarchically nested stores.
-  if (typeof value === 'object') {
+  if (typeof value === 'object' && !Array.isArray(value)) {
     const nextValue = next(name, resolve);
     if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
       return merge({}, nextValue, value);
@@ -71,4 +73,32 @@ export function randomString(): string {
   return Math.random()
     .toString(36)
     .substring(2, 10);
+}
+
+export function assertString(value: any): string | undefined {
+  if (typeof value === 'string' || typeof value === 'undefined') {
+    return value;
+  }
+  throw new TypeError(`expected value to be string but was ${typeof value}`);
+}
+
+export function assertNumber(value: any): number | undefined {
+  if ((typeof value === 'number' && !isNaN(value)) || typeof value === 'undefined') {
+    return value;
+  }
+  throw new TypeError(`expected value to be number but was ${typeof value}`);
+}
+
+export function assertObject(value: any): object | undefined {
+  if (typeof value === 'object' || typeof value === 'undefined') {
+    return value;
+  }
+  throw new TypeError(`expected value to be object but was ${typeof value}`);
+}
+
+export function assertType<T>(value: any, newable: Newable<T>): T | undefined {
+  if (value instanceof newable || typeof value === 'undefined') {
+    return value;
+  }
+  throw new TypeError(`expected value to be ${newable.name} but was ${typeof value}`);
 }

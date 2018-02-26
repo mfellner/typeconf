@@ -1,9 +1,13 @@
 import merge = require('lodash.merge');
 import Newable from './Newable';
+import * as resolvers from './resolvers';
 import TypeConf from './TypeConf';
-import TypeError from './TypeError';
 import {
   Accessor,
+  assertNumber,
+  assertObject,
+  assertString,
+  assertType,
   baseAccessor,
   createAccessor,
   createStore,
@@ -23,9 +27,9 @@ export default abstract class TypeConfBase implements TypeConf {
     this.rootAccessor = baseAccessor;
   }
 
-  private resolve<T>(name: string, resolve?: Resolver<T>): T | undefined {
+  private resolve<T>(name: string, resolve: Resolver<T> = _ => _): T | undefined {
     if (name in this.override) {
-      return this.override[name];
+      return resolve(this.override[name]);
     }
     return this.rootAccessor(name, resolve);
   }
@@ -43,7 +47,7 @@ export default abstract class TypeConfBase implements TypeConf {
   }
 
   public withStore(storage: { [key: string]: any }, name: string = randomString()): TypeConf {
-    const store = createStore(Object.assign({}, storage));
+    const store = createStore({ ...storage });
     this.addStore(store, name);
     return this;
   }
@@ -71,6 +75,9 @@ export default abstract class TypeConfBase implements TypeConf {
   }
 
   public set(key: string, value: any): TypeConf {
+    if (typeof value === 'undefined') {
+      return this;
+    }
     this.override[key] = value;
     return this;
   }
@@ -93,46 +100,17 @@ export default abstract class TypeConfBase implements TypeConf {
   public getString(name: string, fallback: string): string;
   public getString(name: string, fallback?: string): string | undefined;
   public getString(name: string, fallback?: string): string | undefined {
-    const value = this.resolve(name);
-    if (typeof value === 'string') {
-      return value;
-    }
-    if (value !== undefined) {
-      return JSON.stringify(value);
-    }
-    if (typeof fallback === 'string') {
-      return fallback;
-    }
-    if (fallback === undefined) {
-      return;
-    }
-    throw new TypeError(`Not a string: ${fallback}`);
+    const value = this.resolve(name, resolvers.resolveString);
+    if (value !== undefined) return value;
+    return assertString(fallback);
   }
 
   public getNumber(name: string, fallback: number): number;
   public getNumber(name: string, fallback?: number): number | undefined;
   public getNumber(name: string, fallback?: number): number | undefined {
-    const value = this.resolve(name);
-    if (typeof value === 'number' && !isNaN(value)) {
-      return value;
-    }
-    if (typeof value === 'string') {
-      const parsedValue = parseFloat(value);
-      if (!isNaN(parsedValue)) {
-        return parsedValue;
-      }
-      throw new TypeError(`Not a number: ${value}`);
-    }
-    if (value !== undefined && fallback === undefined) {
-      throw new TypeError(`Not a number: ${value}`);
-    }
-    if (typeof fallback === 'number' && !isNaN(fallback)) {
-      return fallback;
-    }
-    if (fallback === undefined) {
-      return;
-    }
-    throw new TypeError(`Not a number: ${fallback}`);
+    const value = this.resolve(name, resolvers.resolveNumber);
+    if (value !== undefined) return value;
+    return assertNumber(fallback);
   }
 
   public getBoolean(name: string): boolean {
@@ -143,38 +121,17 @@ export default abstract class TypeConfBase implements TypeConf {
   public getObject(name: string, fallback: object): object;
   public getObject(name: string, fallback?: object): object | undefined;
   public getObject(name: string, fallback?: object): object | undefined {
-    const value = this.resolve(name);
-    if (typeof value === 'object' && value) {
-      return value;
-    }
-    if (typeof value === 'string' && value) {
-      try {
-        return JSON.parse(value);
-      } catch (e) {
-        throw new TypeError(`Not an object: ${value}`);
-      }
-    }
-    if (fallback === undefined) {
-      return;
-    }
-    if (typeof fallback === 'object') {
-      return fallback;
-    }
-    throw new TypeError(`Not an object: ${fallback}`);
+    const value = this.resolve(name, resolvers.resolveObject);
+    if (value !== undefined) return value;
+    return assertObject(fallback);
   }
 
   public getType<T>(name: string, newable: Newable<T>, fallback: T): T;
   public getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined;
   public getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined {
-    const value = this.resolve(name);
-    if (value === undefined) {
-      return fallback;
-    }
-    try {
-      return new newable(value);
-    } catch (e) {
-      throw new TypeError(`Cannot instantiate ${newable.name} from ${value}.`, e);
-    }
+    const value = this.resolve(name, resolvers.resolveType(newable));
+    if (value !== undefined) return value;
+    return assertType(fallback, newable);
   }
 
   public toJSON(): object {

@@ -1,3 +1,4 @@
+import TypeError from '../src/TypeError';
 import * as util from '../src/util';
 
 const baseAccessor: util.Accessor = <T>(name: string, arg1: true | util.Resolver<T> = _ => _) =>
@@ -124,4 +125,28 @@ test('baseAccessor', () => {
 test('randomString', () => {
   expect(typeof util.randomString() === 'string').toBe(true);
   expect(util.randomString()).toHaveLength(8);
+});
+
+test('assertString', () => {
+  expect(util.assertString('test')).toEqual('test');
+  expect(util.assertString(undefined)).toBeUndefined();
+  expect(() => util.assertString(null)).toThrowError(TypeError);
+});
+
+test('assertNumber', () => {
+  expect(util.assertNumber(42)).toEqual(42);
+  expect(util.assertNumber(undefined)).toBeUndefined();
+  expect(() => util.assertNumber(null)).toThrowError(TypeError);
+});
+
+test('assertObject', () => {
+  expect(util.assertObject({})).toEqual({});
+  expect(util.assertObject(undefined)).toBeUndefined();
+  expect(() => util.assertObject(0)).toThrowError(TypeError);
+});
+
+test('assertType', () => {
+  expect(util.assertType([], Array)).toEqual([]);
+  expect(util.assertType(undefined, Array)).toBeUndefined();
+  expect(() => util.assertType(0, Array)).toThrowError(TypeError);
 });

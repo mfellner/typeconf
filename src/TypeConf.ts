@@ -104,7 +104,6 @@ export interface TypeConf {
    * @param name Name of the value.
    * @param fallback Optional fallback value.
    * @return The stored value as a string.
-   * @throws TypeError
    */
   getString(name: string, fallback: string): string;
   getString(name: string, fallback?: string): string | undefined;
