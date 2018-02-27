@@ -9,20 +9,20 @@ type TestArgs = { name: string; conf: TypeConf; storage: { [key: string]: any } 
 const { stringify } = JSON;
 
 describe('TypeConfBase', () => {
-  test('withArgv should throw', () => {
-    expect(() => new TypeConfBaseImpl().withArgv()).toThrowError(/not implemented/);
+  test('withArgv should do nothing', () => {
+    expect(new TypeConfBaseImpl().withArgv()).toBeInstanceOf(TypeConfBaseImpl);
   });
 
-  test('withEnv should throw', () => {
-    expect(() => new TypeConfBaseImpl().withEnv()).toThrowError(/not implemented/);
+  test('withEnv should do nothing', () => {
+    expect(new TypeConfBaseImpl().withEnv()).toBeInstanceOf(TypeConfBaseImpl);
   });
 
-  test('withFile should throw', () => {
-    expect(() => new TypeConfBaseImpl().withFile('')).toThrowError(/not implemented/);
+  test('withFile should do nothing', () => {
+    expect(new TypeConfBaseImpl().withFile('')).toBeInstanceOf(TypeConfBaseImpl);
   });
 
-  test('withDOMNode should throw', () => {
-    expect(() => new TypeConfBaseImpl().withDOMNode('')).toThrowError(/not implemented/);
+  test('withDOMNode should do nothing', () => {
+    expect(new TypeConfBaseImpl().withDOMNode('')).toBeInstanceOf(TypeConfBaseImpl);
   });
 
   test('toBase64 should throw', () => {

@@ -4,8 +4,8 @@ branches:
     - master
 language: node_js
 node_js:
-  - "6.11.0"
-  - "8.0.0"
+  - "8.9.4"
+  - "9.6.1"
 cache:
   yarn: true
   directories:

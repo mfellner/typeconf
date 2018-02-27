@@ -6,14 +6,16 @@ import Newable from './Newable';
 export interface TypeConf {
   /**
    * Use an object as a source.
-   * @param storage Object store to use.
+   *
+   * @param storage Object storage to use.
    * @param name Optional name of the store.
    * @return This TypeConf instance.
    */
   withStore(storage: { [key: string]: any }, name?: string): TypeConf;
 
   /**
-   * Use a function as a source.
+   * Use a supplier function as a source.
+   *
    * @param provider Function that returns a value for a given key.
    * @param name Optional name of the store.
    * @return This TypeConf instance.
@@ -29,9 +31,10 @@ export interface TypeConf {
    *
    * Node.js only.
    *
+   * @param parser Command-line argument parser. Uses minimist by default.
    * @return This TypeConf instance.
    */
-  withArgv(): TypeConf;
+  withArgv(parser?: (args: string[]) => { [key: string]: any }): TypeConf;
 
   /**
    * Use environment variables as a source. If a prefix is configured,
@@ -151,8 +154,18 @@ export interface TypeConf {
   getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined;
   getType<T>(name: string, newable: Newable<T>, fallback?: T): T | undefined;
 
+  /**
+   * Aggregate all values from all stores (if possible).
+   *
+   * @returns A JavaScript object aggregate of all supported stores.
+   */
   toJSON(): object;
 
+  /**
+   * Aggregate all values from all supported stores and encode them as a Base64 JSON string.
+   *
+   * @returns Base64-encoded JSON string.
+   */
   toBase64(): string;
 }
 

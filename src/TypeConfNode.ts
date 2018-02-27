@@ -1,6 +1,7 @@
 import camelCase = require('camel-case');
 import constantCase = require('constant-case');
 import fs = require('fs');
+import * as Minimist from 'minimist';
 import path = require('path');
 import TypeConf from './TypeConf';
 import TypeConfBase from './TypeConfBase';
@@ -33,8 +34,10 @@ function readConfigFile(filePath: string): object {
 }
 
 export default class TypeConfNode extends TypeConfBase {
-  public withArgv(): TypeConf {
-    const argv = require('minimist')(process.argv.slice(2));
+  public withArgv(
+    parser: (args: string[]) => { [key: string]: any } = require('minimist') as typeof Minimist
+  ): TypeConf {
+    const argv = parser(process.argv.slice(2));
     const store = createStore(new ObjectSupplier(argv), camelCase);
 
     this.addStore(store, '__argv__');

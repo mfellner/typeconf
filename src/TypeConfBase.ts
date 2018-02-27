@@ -65,19 +65,19 @@ export default abstract class TypeConfBase implements TypeConf {
   }
 
   public withArgv(): TypeConf {
-    throw new Error('not implemented: withArgv');
+    return this;
   }
 
   public withEnv(_?: string, __?: string): TypeConf {
-    throw new Error('not implemented: withEnv');
+    return this;
   }
 
   public withFile(_: string): TypeConf {
-    throw new Error('not implemented: withEnv');
+    return this;
   }
 
   public withDOMNode(_: string): TypeConf {
-    throw new Error('not implemented: withDOMNode');
+    return this;
   }
 
   public set(key: string, value: any): TypeConf {
