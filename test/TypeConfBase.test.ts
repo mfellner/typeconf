@@ -25,6 +25,10 @@ describe('TypeConfBase', () => {
     expect(() => new TypeConfBaseImpl().withDOMNode('')).toThrowError(/not implemented/);
   });
 
+  test('toBase64 should throw', () => {
+    expect(() => new TypeConfBaseImpl().toBase64()).toThrowError(/not implemented/);
+  });
+
   const storage = Object.freeze({
     string: 'test',
     number: 42,
@@ -233,11 +237,17 @@ describe('TypeConfBase', () => {
     expect(() => conf.getType('bool', StringNewable)).toThrowError(TypeError);
   });
 
-  test('TypeConfBase.toJSON', () => {
+  test('TypeConfBase.toJSON withStore', () => {
     conf = new TypeConfBaseImpl()
       .withStore({ w: 'w', x: 'x' })
       .withStore({ y: 'y', z: { a: 1 } })
       .withStore({ x: null });
     expect(conf.toJSON()).toEqual({ w: 'w', x: null, y: 'y', z: { a: 1 } });
+  });
+
+  test('TypeConfBase.toJSON withSupplier', () => {
+    conf = new TypeConfBaseImpl().withSupplier((name: string) => ({ a: 'a', b: 'b' }[name]));
+    // Suppliers cannot be aggregated.
+    expect(conf.toJSON()).toEqual({});
   });
 });

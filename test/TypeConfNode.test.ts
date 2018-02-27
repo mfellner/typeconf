@@ -148,7 +148,7 @@ describe('TypeConfNode', () => {
     expect(new TypeConfNode().withFile('')).toBeInstanceOf(TypeConfNode);
   });
 
-  test('conf.toJSON withEnv', () => {
+  test('conf.toJSON withEnv and prefix', () => {
     const conf = new TypeConfNode().withEnv('typeConf');
     process.env['TYPE_CONF_A'] = 'a';
     process.env['TYPE_CONF_B'] = '42';
@@ -157,5 +157,20 @@ describe('TypeConfNode', () => {
     process.env['TYPE_CONF_D'] = 'd';
 
     expect(conf.toJSON()).toEqual({ a: 'a', b: '42', c: { aa: 'aa', bb: 'bb' }, d: 'd' });
+  });
+
+  test('conf.toJSON withEnv and without prefix', () => {
+    const conf = new TypeConfNode().withEnv();
+    process.env['TYPE_CONF_A'] = 'a';
+    process.env['TYPE_CONF_B'] = 'b';
+    expect(conf.toJSON()).toEqual({});
+  });
+
+  test('conf.toBase64', () => {
+    const conf = new TypeConfNode().withStore({ a: 'a', b: 42 });
+    expect(JSON.parse(new Buffer(conf.toBase64(), 'base64').toString('utf-8'))).toEqual({
+      a: 'a',
+      b: 42
+    });
   });
 });

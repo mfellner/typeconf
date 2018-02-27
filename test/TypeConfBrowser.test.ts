@@ -45,4 +45,12 @@ describe('TypeConfBrowser', () => {
 
     expect(() => new TypeConfBrowser().withDOMNode('typeconf')).toThrowError(StoreError);
   });
+
+  test('conf.toBase64', () => {
+    const conf = new TypeConfBrowser().withStore({ a: 'a', b: 42 });
+    expect(JSON.parse(atob(conf.toBase64()))).toEqual({
+      a: 'a',
+      b: 42
+    });
+  });
 });

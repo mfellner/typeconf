@@ -1,3 +1,4 @@
+import camelCase = require('camel-case');
 import TypeError from '../src/TypeError';
 import * as util from '../src/util';
 
@@ -105,6 +106,24 @@ test('baseAccessor', () => {
   expect(util.baseAccessor('test')).toBeUndefined();
   expect(util.baseAccessor('test', _ => _)).toBeUndefined();
   expect(util.baseAccessor('test', true)).toBe(false);
+});
+
+test('aggregateContainerValues', () => {
+  const container = {
+    TYPE_CONF_A: 'a',
+    TYPE_CONF_B: 'b',
+    TYPE_CONF_C__AA: 'aa',
+    TYPE_CONF_C__BB: 'bb',
+    D: 'd',
+    TYPE_CONF_E: 'e'
+  };
+
+  expect(util.aggregateContainerValues(container, 'TYPE_CONF', '__', camelCase)).toEqual({
+    a: 'a',
+    b: 'b',
+    c: { aa: 'aa', bb: 'bb' },
+    e: 'e'
+  });
 });
 
 test('randomString', () => {

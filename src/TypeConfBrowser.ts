@@ -23,4 +23,8 @@ export default class TypeConfBrowser extends TypeConfBase {
     this.addStore(store, `__DOM_${id}__`);
     return this;
   }
+
+  public toBase64(): string {
+    return btoa(JSON.stringify(this.toJSON()));
+  }
 }

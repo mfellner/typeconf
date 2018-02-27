@@ -106,6 +106,41 @@ export const baseAccessor: Accessor = <T>(_: string, arg1?: boolean | Resolver<T
   else return undefined;
 };
 
+export type Aggregate = { [key: string]: string | Aggregate };
+
+export function aggregateContainerValues(
+  container: { [key: string]: string | undefined },
+  prefix: string,
+  separator: string,
+  keyTransform: (key: string) => string
+) {
+  const aggregate: Aggregate = {};
+  for (const key of Object.keys(container).filter(
+    k => k.startsWith(prefix) && typeof container[k] !== 'undefined'
+  )) {
+    const subKeys = key
+      .replace(prefix, '')
+      .split(separator)
+      .filter(k => k);
+    if (subKeys.length > 1) {
+      let currentAggregate = aggregate;
+      for (let i = 0; i < subKeys.length; i += 1) {
+        const k = keyTransform(subKeys[i]);
+        if (i < subKeys.length - 1) {
+          currentAggregate[k] = aggregate[k] || {};
+          currentAggregate = currentAggregate[k] as Aggregate;
+        } else {
+          currentAggregate[k] = container[key]!;
+        }
+      }
+    } else {
+      const k = keyTransform(key.replace(prefix, ''));
+      aggregate[k] = container[key]!;
+    }
+  }
+  return aggregate;
+}
+
 export function randomString(): string {
   return Math.random()
     .toString(36)
