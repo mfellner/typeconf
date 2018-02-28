@@ -245,6 +245,14 @@ describe('TypeConfBase', () => {
     expect(conf.toJSON()).toEqual({ w: 'w', x: null, y: 'y', z: { a: 1 } });
   });
 
+  test('TypeConfBase.toJSON with override', () => {
+    conf = new TypeConfBaseImpl()
+      .withStore({ w: 'w', x: 'x' })
+      .set('w', null)
+      .set('y', 'y');
+    expect(conf.toJSON()).toEqual({ w: null, x: 'x', y: 'y' });
+  });
+
   test('TypeConfBase.toJSON withSupplier', () => {
     conf = new TypeConfBaseImpl().withSupplier((name: string) => ({ a: 'a', b: 'b' }[name]));
     // Suppliers cannot be aggregated.

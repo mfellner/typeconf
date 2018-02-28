@@ -64,7 +64,7 @@ export default abstract class TypeConfBase implements TypeConf {
     return this;
   }
 
-  public withArgv(): TypeConf {
+  public withArgv(_?: (args: string[]) => { [key: string]: any }): TypeConf {
     return this;
   }
 
@@ -145,7 +145,7 @@ export default abstract class TypeConfBase implements TypeConf {
     for (const store of Object.values(this.stores)) {
       merge(aggregate, store.aggregate());
     }
-    return aggregate;
+    return merge(aggregate, this.override);
   }
 
   public toBase64(): string {
