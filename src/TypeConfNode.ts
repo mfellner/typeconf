@@ -33,10 +33,14 @@ function readConfigFile(filePath: string): object {
   }
 }
 
+function defaultArgvParser(args: string[]): { [key: string]: any } {
+  const minimist = require('minimist') as typeof Minimist;
+  const { _, ...rest } = minimist(args);
+  return rest;
+}
+
 export default class TypeConfNode extends TypeConfBase {
-  public withArgv(
-    parser: (args: string[]) => { [key: string]: any } = require('minimist') as typeof Minimist
-  ): TypeConf {
+  public withArgv(parser = defaultArgvParser): TypeConf {
     const argv = parser(process.argv.slice(2));
     const store = createStore(new ObjectSupplier(argv), camelCase);
 
