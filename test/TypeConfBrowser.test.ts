@@ -13,7 +13,7 @@ describe('TypeConfBrowser', () => {
     const storage = { number: 42 };
     const element = document.createElement('meta');
     element.setAttribute('id', 'typeconf');
-    element.setAttribute('value', btoa(JSON.stringify(storage)));
+    element.setAttribute('content', btoa(JSON.stringify(storage)));
     document.head.appendChild(element);
 
     const conf = new TypeConfBrowser().withDOMNode('typeconf');
@@ -31,7 +31,7 @@ describe('TypeConfBrowser', () => {
   test('TypeConfBrowser.getString with DOM node with empty value attribute', () => {
     const element = document.createElement('meta');
     element.setAttribute('id', 'typeconf');
-    element.setAttribute('value', '');
+    element.setAttribute('content', '');
     document.head.appendChild(element);
 
     expect(new TypeConfBrowser().withDOMNode('typeconf')).toBeInstanceOf(TypeConfBrowser);
@@ -40,7 +40,7 @@ describe('TypeConfBrowser', () => {
   test('TypeConfBrowser.getString with DOM node should throw', () => {
     const element = document.createElement('meta');
     element.setAttribute('id', 'typeconf');
-    element.setAttribute('value', 'invalid');
+    element.setAttribute('content', 'invalid');
     document.head.appendChild(element);
 
     expect(() => new TypeConfBrowser().withDOMNode('typeconf')).toThrowError(StoreError);
