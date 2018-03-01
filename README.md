@@ -41,7 +41,7 @@ TypeConf supports different storage backends for configuration values:
 
 #### Browser only:
 
-* **withDOMNode(id: string)** DOM element with encoded `value` attribute
+* **withDOMNode(id: string, attribute?: string)** DOM element with encoded `content` attribute
 
 Backends are queried for existing values in the reverse order that they were added. For example:
 
@@ -124,12 +124,12 @@ conf.getObject('object') === { a: 'a', b: { bb: 'bb' } };
 
 **Node.js only.** Use a configuration file as a source. JSON and YAML (requires [js-yaml](https://www.npmjs.com/package/js-yaml)) are supported.
 
-### withDOMNode(id: string): TypeConf
+### withDOMNode(id: string, attribute?: string): TypeConf
 
-**Browser only.** Use a DOM element with a `value` attribute as a source. The value must be a Base64-encoded JSON string. For example:
+**Browser only.** Use a DOM element as a source. The configuration must be a Base64-encoded JSON string in an attribute of the element (default: `content`). For example:
 
 ```html
-<meta id="conf" value="eyJhIjoiYiJ9" />
+<meta id="conf" content="eyJhIjoiYiJ9" />
 ```
 
 ### set(key: string, value: any): TypeConf
