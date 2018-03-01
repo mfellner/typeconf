@@ -83,6 +83,11 @@ describe('TypeConfNode', () => {
     expect(conf.getBoolean('object')).toEqual(true);
   });
 
+  test('conf.get with empty env', () => {
+    const conf = new TypeConfNode().withEnv();
+    expect(conf.get('test')).toBeUndefined();
+  });
+
   test('conf.getObject withFile and YAML file', () => {
     const conf = new TypeConfNode().withFile(path.resolve(__dirname, 'conf.yaml'));
     expect(conf.getObject('object')).toEqual({ string: 'string' });

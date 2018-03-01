@@ -68,10 +68,11 @@ export interface TypeConf {
    *
    * Browser only.
    *
-   * @param id ID attribute of the DOM element.
+   * @param id ID attribute value of the DOM element.
+   * @param attribute Content attribute name of the DOM element (default: 'content').
    * @return This TypeConf instance.
    */
-  withDOMNode(id: string): TypeConf;
+  withDOMNode(id: string, attribute?: string): TypeConf;
 
   /**
    * Set an override value.

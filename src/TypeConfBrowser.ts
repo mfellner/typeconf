@@ -4,12 +4,12 @@ import TypeConfBase from './TypeConfBase';
 import { createStore, ObjectSupplier } from './util';
 
 export default class TypeConfBrowser extends TypeConfBase {
-  public withDOMNode(id: string): TypeConf {
+  public withDOMNode(id: string, attribute: string = 'content'): TypeConf {
     const element = document.getElementById(id);
-    if (!element || !element.hasAttribute('value')) {
+    if (!element || !element.hasAttribute(attribute)) {
       return this;
     }
-    const encodedString = element.getAttribute('value');
+    const encodedString = element.getAttribute(attribute);
     if (!encodedString) {
       return this;
     }
@@ -17,7 +17,7 @@ export default class TypeConfBrowser extends TypeConfBase {
     try {
       storage = JSON.parse(atob(encodedString));
     } catch (e) {
-      throw new StoreError(`cannot read value of DOM node ${id}`, e);
+      throw new StoreError(`cannot read attribute ${attribute} of DOM node ${id}`, e);
     }
     const store = createStore(new ObjectSupplier(storage));
     this.addStore(store, `__DOM_${id}__`);
