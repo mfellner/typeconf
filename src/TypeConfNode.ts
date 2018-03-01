@@ -61,8 +61,11 @@ export default class TypeConfNode extends TypeConfBase {
       get(name: string) {
         const envName = getEnvName(name);
         const result = process.env[envName];
-        if (result !== undefined) return result;
-        return aggregateContainerValues(process.env, envName, separator, camelCase);
+        if (typeof result !== 'undefined') return result;
+        const aggregate = aggregateContainerValues(process.env, envName, separator, camelCase);
+        if (Object.keys(aggregate).length > 0) {
+          return aggregate;
+        }
       },
       aggregate() {
         // We can only find relevant environment variables if a prefix is specified.
