@@ -18,7 +18,7 @@ import {
 } from './util';
 
 export default abstract class TypeConfBase implements TypeConf {
-  private readonly override: { [key: string]: any };
+  private readonly override: { [key: string]: unknown };
   private readonly stores: { [name: string]: Store };
   private rootAccessor: Accessor;
 
@@ -47,13 +47,13 @@ export default abstract class TypeConfBase implements TypeConf {
     this.rootAccessor = createAccessor(store, this.rootAccessor);
   }
 
-  public withStore(storage: { [key: string]: any }, name: string = randomString()): TypeConf {
+  public withStore(storage: { [key: string]: unknown }, name: string = randomString()): TypeConf {
     const store = createStore(new ObjectSupplier(storage));
     this.addStore(store, name);
     return this;
   }
 
-  public withSupplier(supplier: (key: string) => any, name: string = randomString()): TypeConf {
+  public withSupplier(supplier: (key: string) => unknown, name: string = randomString()): TypeConf {
     const store = createStore({
       get: supplier,
       aggregate() {
@@ -64,7 +64,7 @@ export default abstract class TypeConfBase implements TypeConf {
     return this;
   }
 
-  public withArgv(_?: (args: string[]) => { [key: string]: any }): TypeConf {
+  public withArgv(_?: (args: string[]) => { [key: string]: unknown }): TypeConf {
     return this;
   }
 
@@ -80,7 +80,7 @@ export default abstract class TypeConfBase implements TypeConf {
     return this;
   }
 
-  public set(key: string, value: any): TypeConf {
+  public set(key: string, value: unknown): TypeConf {
     if (typeof value === 'undefined') {
       return this;
     }
@@ -93,9 +93,9 @@ export default abstract class TypeConfBase implements TypeConf {
     return this;
   }
 
-  public get<T>(name: string, transform: (x: any) => T): T;
-  public get<T>(name: string, transform?: undefined): any;
-  public get<T>(name: string, transform?: ((x: any) => T)): T | any {
+  public get<T>(name: string, transform: (x: unknown) => T): T;
+  public get<T>(name: string, transform?: undefined): unknown;
+  public get<T>(name: string, transform?: ((x: unknown) => T)): T | unknown {
     if (typeof transform === 'function') {
       return transform(this.resolve(name));
     } else {

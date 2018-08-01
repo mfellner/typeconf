@@ -11,7 +11,7 @@ export interface TypeConf {
    * @param name Optional name of the store.
    * @return This TypeConf instance.
    */
-  withStore(storage: { [key: string]: any }, name?: string): TypeConf;
+  withStore(storage: { [key: string]: unknown }, name?: string): TypeConf;
 
   /**
    * Use a supplier function as a source.
@@ -20,7 +20,7 @@ export interface TypeConf {
    * @param name Optional name of the store.
    * @return This TypeConf instance.
    */
-  withSupplier(supplier: (key: string) => any, name?: string): TypeConf;
+  withSupplier(supplier: (key: string) => unknown, name?: string): TypeConf;
 
   /**
    * Use command line arguments as a source.
@@ -34,7 +34,7 @@ export interface TypeConf {
    * @param parser Command-line argument parser. Uses minimist by default.
    * @return This TypeConf instance.
    */
-  withArgv(parser?: (args: string[]) => { [key: string]: any }): TypeConf;
+  withArgv(parser?: (args: string[]) => { [key: string]: unknown }): TypeConf;
 
   /**
    * Use environment variables as a source. If a prefix is configured,
@@ -81,7 +81,7 @@ export interface TypeConf {
    * @param value Actual value.
    * @return This TypeConf instance.
    */
-  set(key: string, value: any): TypeConf;
+  set(key: string, value: unknown): TypeConf;
 
   /**
    * Delete an override value.
@@ -98,9 +98,9 @@ export interface TypeConf {
    * @param transform Optional transformation function.
    * @return The stored value.
    */
-  get<T>(name: string, transform: (x: any) => T): T;
-  get<T>(name: string, transform?: undefined): any;
-  get<T>(name: string, transform?: ((x: any) => T)): T | any;
+  get<T>(name: string, transform: (x: unknown) => T): T;
+  get<T>(name: string, transform?: undefined): unknown;
+  get<T>(name: string, transform?: ((x: unknown) => T)): T | unknown;
 
   /**
    * Return a stored value as a string.

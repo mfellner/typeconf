@@ -7,10 +7,10 @@ import TypeConf from './TypeConf';
 import TypeConfBase from './TypeConfBase';
 import { aggregateContainerValues, createStore, ObjectSupplier } from './util';
 
-function readFile(file: string, parser: (s: string) => any): object {
+function readFile(file: string, parser: (s: string) => unknown): object {
   try {
     const result = parser(fs.readFileSync(file, 'utf8'));
-    if (typeof result === 'object' && result !== null) return result;
+    if (result instanceof Object) return result;
     console.error(`Invalid configuration file: ${file}`);
   } catch (e) {
     console.error(`Unable to read ${file}`);
@@ -33,7 +33,7 @@ function readConfigFile(filePath: string): object {
   }
 }
 
-function defaultArgvParser(args: string[]): { [key: string]: any } {
+function defaultArgvParser(args: string[]): { [key: string]: unknown } {
   const minimist = require('minimist') as typeof Minimist;
   const { _, ...rest } = minimist(args);
   return rest;

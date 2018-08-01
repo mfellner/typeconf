@@ -7,7 +7,7 @@ import TypeError from './TypeError';
  * @param value Raw value.
  * @returns String or undefined if value is undefined.
  */
-export function resolveString(value: any): string | undefined {
+export function resolveString(value: unknown): string | undefined {
   if (typeof value === 'string') {
     return value;
   }
@@ -23,7 +23,7 @@ export function resolveString(value: any): string | undefined {
  * @returns Number or undefined if value is undefined.
  * @throws TypeError if the value is defined but cannot be parsed as a number.
  */
-export function resolveNumber(value: any): number | undefined {
+export function resolveNumber(value: unknown): number | undefined {
   if (typeof value === 'number' && !isNaN(value)) {
     return value;
   }
@@ -45,9 +45,9 @@ export function resolveNumber(value: any): number | undefined {
  * @returns Object or undefined if value is undefined.
  * @throws TypeError if the value is defined but cannot be parsed as an object.
  */
-export function resolveObject(value: any): object | undefined {
-  if (typeof value === 'object') {
-    return value;
+export function resolveObject(value: unknown): object | undefined {
+  if (value instanceof Object || value === null) {
+    return value as object;
   }
   if (typeof value === 'string' && value) {
     try {
@@ -75,7 +75,7 @@ export function resolveType<T>(newable: Newable<T>) {
    * @returns Instance of Newable<T> or undefined if value is undefined.
    * @throws TypeError if the constructor of newable throws an error.
    */
-  return (value: any) => {
+  return (value: unknown) => {
     if (typeof value === 'undefined') {
       return;
     }

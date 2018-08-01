@@ -31,7 +31,7 @@ test('getValueOrNext with resolver', () => {
 });
 
 test('getValueOrNext should merge objects', () => {
-  const accessor: util.Accessor = (name: string, _: any) => ({ object: { y: null, z: 'z' } }[name]);
+  const accessor: util.Accessor = (name: string, _: unknown) => ({ object: { y: null, z: 'z' } }[name]);
   const value = util.getValueOrNext(
     'object',
     new util.ObjectSupplier({ object: { x: 'x', y: 'y' } }),
@@ -41,7 +41,7 @@ test('getValueOrNext should merge objects', () => {
 });
 
 test('getValueOrNext should not merge non-objects', () => {
-  const accessor: util.Accessor = (name: string, _: any) => ({ object: [1, 2, 3] }[name]);
+  const accessor: util.Accessor = (name: string, _: unknown) => ({ object: [1, 2, 3] }[name]);
   const value = util.getValueOrNext(
     'object',
     new util.ObjectSupplier({ object: { x: 'x' } }),

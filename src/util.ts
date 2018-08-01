@@ -14,10 +14,10 @@ export interface Store {
   aggregate(): ObjectStorage;
 }
 
-export type ObjectStorage = { [name: string]: any };
+export type ObjectStorage = { [name: string]: unknown };
 
 export interface Supplier {
-  get(name: string): any;
+  get(name: string): unknown;
   aggregate(): ObjectStorage;
 }
 
@@ -38,7 +38,7 @@ export class ObjectSupplier implements Supplier {
     this.storage = { ...storage };
   }
 
-  public get(name: string): any {
+  public get(name: string): unknown {
     return this.storage[name];
   }
 
@@ -147,29 +147,33 @@ export function randomString(): string {
     .substring(2, 10);
 }
 
-export function assertString(value: any): string | undefined {
+export function assertString(value: unknown): string | undefined {
   if (typeof value === 'string' || typeof value === 'undefined') {
     return value;
   }
   throw new TypeError(`expected value to be string but was ${typeof value}`);
 }
 
-export function assertNumber(value: any): number | undefined {
+export function assertNumber(value: unknown): number | undefined {
   if ((typeof value === 'number' && !isNaN(value)) || typeof value === 'undefined') {
     return value;
   }
   throw new TypeError(`expected value to be number but was ${typeof value}`);
 }
 
-export function assertObject(value: any): object | undefined {
-  if (typeof value === 'object' || typeof value === 'undefined') {
+export function assertObject(value: unknown): object | undefined {
+  if (value instanceof Object || typeof value === 'undefined') {
     return value;
   }
   throw new TypeError(`expected value to be object but was ${typeof value}`);
 }
 
-export function assertType<T>(value: any, newable: Newable<T>): T | undefined {
-  if (value instanceof newable || typeof value === 'undefined') {
+function isNewable<T>(value: unknown, newable: Newable<T>): value is T {
+  return value instanceof newable;
+}
+
+export function assertType<T>(value: unknown, newable: Newable<T>): T | undefined {
+  if (isNewable(value, newable) || typeof value === 'undefined') {
     return value;
   }
   throw new TypeError(`expected value to be ${newable.name} but was ${typeof value}`);

@@ -4,7 +4,7 @@ import TypeError from '../src/TypeError';
 
 class TypeConfBaseImpl extends TypeConfBase {}
 
-type TestArgs = { name: string; conf: TypeConf; storage: { [key: string]: any } };
+type TestArgs = { name: string; conf: TypeConf; storage: { [key: string]: unknown } };
 
 const { stringify } = JSON;
 
@@ -80,7 +80,7 @@ describe('TypeConfBase', () => {
   });
 
   test('TypeConfBase.get with resolver', () => {
-    const resolve = jest.fn((value: any) => stringify(value));
+    const resolve = jest.fn((value: unknown) => stringify(value));
     expect(conf.get('string', resolve)).toEqual(stringify(storage['string']));
     expect(resolve).toBeCalled();
     resolve.mockClear();

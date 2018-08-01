@@ -13,7 +13,7 @@ export default class TypeConfBrowser extends TypeConfBase {
     if (!encodedString) {
       return this;
     }
-    let storage: { [key: string]: any };
+    let storage: { [key: string]: unknown };
     try {
       storage = JSON.parse(atob(encodedString));
     } catch (e) {
